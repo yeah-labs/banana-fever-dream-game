@@ -1,0 +1,169 @@
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { GameState } from '@/types/game';
+
+interface GameOverProps {
+  gameState: GameState;
+  onRestart: () => void;
+  onMainMenu: () => void;
+  isNewHighScore: boolean;
+}
+
+export const GameOver: React.FC<GameOverProps> = ({ 
+  gameState, 
+  onRestart, 
+  onMainMenu,
+  isNewHighScore
+}) => {
+  const [playerName, setPlayerName] = useState('');
+  const [showNameInput, setShowNameInput] = useState(isNewHighScore);
+
+  const { player, level, wave, gameTime } = gameState;
+  const timeMinutes = Math.floor(gameTime / 60);
+  const timeSeconds = Math.floor(gameTime % 60);
+
+  const handleSaveScore = () => {
+    // TODO: Save to localStorage or backend
+    console.log('Saving score:', { 
+      score: player.score, 
+      level, 
+      waves: wave,
+      playerName: playerName || 'Anonymous',
+      timestamp: Date.now() 
+    });
+    setShowNameInput(false);
+  };
+
+  useEffect(() => {
+    if (isNewHighScore) {
+      // Add confetti or celebration animation
+      console.log('New high score achieved!');
+    }
+  }, [isNewHighScore]);
+
+  return (
+    <div className="min-h-screen bg-gradient-game flex items-center justify-center p-4">
+      <div className="max-w-2xl w-full space-y-8">
+        {/* Game Over Title */}
+        <div className="text-center space-y-4">
+          <h1 className="text-5xl font-bold text-destructive animate-pulse">
+            FEVER DREAM ENDED
+          </h1>
+          {isNewHighScore && (
+            <div className="text-2xl font-bold text-primary animate-bounce">
+              🎉 NEW HIGH SCORE! 🎉
+            </div>
+          )}
+          <p className="text-lg text-muted-foreground">
+            The Pith have overtaken the swamp... for now.
+          </p>
+        </div>
+
+        {/* Final Stats */}
+        <Card className="bg-card/80 backdrop-blur-sm border-destructive/20">
+          <CardHeader>
+            <CardTitle className="text-center text-primary">Final Stats</CardTitle>
+            <CardDescription className="text-center">
+              Your performance in the fever dream
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Main Score */}
+            <div className="text-center">
+              <div className="text-4xl font-bold text-primary mb-2">
+                {player.score.toLocaleString()}
+              </div>
+              <div className="text-sm text-muted-foreground">Final Score</div>
+            </div>
+
+            {/* Detailed Stats */}
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-foreground">{level}</div>
+                <div className="text-sm text-muted-foreground">Level Reached</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-foreground">{wave}</div>
+                <div className="text-sm text-muted-foreground">Waves Survived</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-foreground">
+                  {timeMinutes}:{timeSeconds.toString().padStart(2, '0')}
+                </div>
+                <div className="text-sm text-muted-foreground">Time Played</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-foreground">
+                  {Math.floor(player.feverMeter)}%
+                </div>
+                <div className="text-sm text-muted-foreground">Final Fever</div>
+              </div>
+            </div>
+
+            {/* Name Input for High Score */}
+            {showNameInput && (
+              <div className="pt-4 border-t border-border space-y-3">
+                <div className="text-center">
+                  <h4 className="font-semibold text-primary mb-2">
+                    Enter your name for the leaderboard:
+                  </h4>
+                  <div className="flex gap-2 max-w-sm mx-auto">
+                    <Input
+                      value={playerName}
+                      onChange={(e) => setPlayerName(e.target.value)}
+                      placeholder="Your name"
+                      maxLength={20}
+                      className="text-center"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveScore();
+                      }}
+                    />
+                    <Button 
+                      onClick={handleSaveScore}
+                      variant="outline"
+                      className="whitespace-nowrap"
+                    >
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button
+            onClick={onRestart}
+            size="lg"
+            className="bg-gradient-banana hover:shadow-fever 
+                     transition-all duration-300 transform hover:scale-105"
+          >
+            PLAY AGAIN
+          </Button>
+          <Button
+            onClick={onMainMenu}
+            variant="outline"
+            size="lg"
+            className="border-primary hover:bg-primary/10"
+          >
+            MAIN MENU
+          </Button>
+        </div>
+
+        {/* Motivational Message */}
+        <div className="text-center space-y-2">
+          <p className="text-sm text-muted-foreground">
+            "Every fever dream is a chance to grow stronger."
+          </p>
+          <p className="text-xs text-muted-foreground opacity-60">
+            The swamp awaits your return...
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};

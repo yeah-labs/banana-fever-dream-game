@@ -22,6 +22,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -47,6 +48,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Game-specific colors
+        enemy: {
+          primary: "hsl(var(--enemy-primary))",
+          secondary: "hsl(var(--enemy-secondary))",
+        },
+        powerup: "hsl(var(--power-up))",
+        fever: "hsl(var(--fever-active))",
+        boss: "hsl(var(--boss-threat))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -63,27 +72,57 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      backgroundImage: {
+        'gradient-game': 'var(--gradient-game)',
+        'gradient-banana': 'var(--gradient-banana)',
+        'gradient-fever': 'var(--gradient-fever)',
+        'gradient-enemy': 'var(--gradient-enemy)',
+      },
+      boxShadow: {
+        'banana': 'var(--shadow-banana)',
+        'enemy': 'var(--shadow-enemy)',
+        'fever': 'var(--shadow-fever)',
+        'glow': 'var(--shadow-glow)',
+      },
+      transitionTimingFunction: {
+        'fast': 'var(--transition-fast)',
+        'smooth': 'var(--transition-smooth)',
+        'bounce': 'var(--transition-bounce)',
+      },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "pulse-banana": {
+          "0%, 100%": { transform: "scale(1)", boxShadow: "var(--shadow-banana)" },
+          "50%": { transform: "scale(1.05)", boxShadow: "0 0 30px hsl(var(--primary) / 0.8)" },
+        },
+        "shake": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "25%": { transform: "translateX(-2px)" },
+          "75%": { transform: "translateX(2px)" },
+        },
+        "enemy-float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-5px)" },
+        },
+        "fever-build": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "100%": { backgroundPosition: "100% 50%" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-banana": "pulse-banana 2s ease-in-out infinite",
+        "shake": "shake 0.2s ease-in-out",
+        "enemy-float": "enemy-float 3s ease-in-out infinite",
+        "fever-build": "fever-build 2s linear infinite",
       },
     },
   },

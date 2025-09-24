@@ -2,41 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Banana Fever Dream - BAYC-inspired arcade game design system. 
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Game Background & Core */
+    --background: 230 15% 8%;
+    --foreground: 45 100% 85%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card & UI Elements */
+    --card: 230 15% 12%;
+    --card-foreground: 45 100% 85%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 230 15% 12%;
+    --popover-foreground: 45 100% 85%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Banana Yellow */
+    --primary: 45 100% 50%;
+    --primary-foreground: 230 15% 8%;
+    --primary-glow: 45 100% 65%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - BAYC Green */
+    --secondary: 120 40% 35%;
+    --secondary-foreground: 45 100% 85%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted - Darker tones */
+    --muted: 230 15% 15%;
+    --muted-foreground: 45 20% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Neon highlights */
+    --accent: 280 100% 70%;
+    --accent-foreground: 230 15% 8%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive - Enemy red */
+    --destructive: 0 80% 55%;
+    --destructive-foreground: 45 100% 85%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders & Inputs */
+    --border: 230 15% 20%;
+    --input: 230 15% 15%;
+    --ring: 45 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Game-specific colors */
+    --enemy-primary: 0 80% 55%;
+    --enemy-secondary: 15 70% 45%;
+    --power-up: 280 100% 70%;
+    --fever-active: 30 100% 60%;
+    --boss-threat: 350 80% 40%;
+
+    /* Gradients */
+    --gradient-game: linear-gradient(135deg, hsl(var(--background)), hsl(230 15% 5%));
+    --gradient-banana: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-fever: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--fever-active)));
+    --gradient-enemy: linear-gradient(180deg, hsl(var(--enemy-primary)), hsl(var(--enemy-secondary)));
+
+    /* Shadows & Effects */
+    --shadow-banana: 0 0 20px hsl(var(--primary) / 0.5);
+    --shadow-enemy: 0 0 15px hsl(var(--enemy-primary) / 0.4);
+    --shadow-fever: 0 0 30px hsl(var(--fever-active) / 0.6);
+    --shadow-glow: 0 0 40px hsl(var(--accent) / 0.3);
+
+    /* Animations */
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
@@ -55,42 +88,9 @@ All colors MUST be HSL.
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  /* Dark mode - Game runs in dark theme only */
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Same as light mode since game is dark-themed */
   }
 }
 
@@ -100,6 +100,45 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-mono overflow-hidden;
+  }
+
+  /* Game-specific animations */
+  @keyframes pulse-banana {
+    0%, 100% { transform: scale(1); box-shadow: var(--shadow-banana); }
+    50% { transform: scale(1.05); box-shadow: 0 0 30px hsl(var(--primary) / 0.8); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+  }
+
+  @keyframes enemy-float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+  }
+
+  @keyframes fever-build {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+
+  .animate-pulse-banana {
+    animation: pulse-banana 2s ease-in-out infinite;
+  }
+
+  .animate-shake {
+    animation: shake 0.2s ease-in-out;
+  }
+
+  .animate-enemy-float {
+    animation: enemy-float 3s ease-in-out infinite;
+  }
+
+  .animate-fever-build {
+    animation: fever-build 2s linear infinite;
+    background-size: 200% 200%;
   }
 }
