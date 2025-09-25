@@ -47,7 +47,7 @@ export interface PowerUp extends GameObject {
 }
 
 export interface GameState {
-  status: 'menu' | 'playing' | 'paused' | 'game-over';
+  status: 'ready' | 'playing' | 'paused' | 'game-over';
   player: Player;
   enemies: Enemy[];
   bullets: Bullet[];

@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { GameCanvas } from './GameCanvas';
 import { GameUI } from './GameUI';
-import { GameMenu } from './GameMenu';
+
 import { GameOver } from './GameOver';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 export const BananaFeverDream: React.FC = () => {
@@ -27,7 +28,9 @@ export const BananaFeverDream: React.FC = () => {
       switch (key) {
         case ' ':
           event.preventDefault();
-          if (gameState.status === 'playing') {
+          if (gameState.status === 'ready') {
+            handleStartGame();
+          } else if (gameState.status === 'playing') {
             if (gameState.player.feverMeter >= 100) {
               activateFever();
               toast.success('🍌 BANANA FEVER ACTIVATED!', {
@@ -115,21 +118,13 @@ export const BananaFeverDream: React.FC = () => {
   };
 
   const handleMainMenu = () => {
-    // Reset to menu state
+    // Reset to ready state instead of reloading
+    setIsNewHighScore(false);
     window.location.reload();
   };
 
   const renderCurrentScreen = () => {
     switch (gameState.status) {
-      case 'menu':
-        return (
-          <GameMenu
-            onStartGame={handleStartGame}
-            secretMode={gameState.secretMode}
-            highScore={highScore}
-          />
-        );
-      
       case 'game-over':
         return (
           <GameOver
@@ -140,6 +135,7 @@ export const BananaFeverDream: React.FC = () => {
           />
         );
       
+      case 'ready':
       case 'playing':
       case 'paused':
         return (
@@ -236,11 +232,36 @@ export const BananaFeverDream: React.FC = () => {
                 </div>
               )}
 
+              {/* Game Controls - bottom left */}
+              <div className="absolute -bottom-20 left-0 flex gap-2">
+                {gameState.status === 'ready' && (
+                  <>
+                    <Button
+                      onClick={handleStartGame}
+                      size="lg"
+                      className="bg-gradient-banana hover:shadow-fever 
+                               transition-all duration-300 transform hover:scale-105
+                               border-2 border-primary-glow"
+                    >
+                      START GAME
+                    </Button>
+                    <Button
+                      onClick={() => toast.info('Leaderboard coming soon!')}
+                      variant="outline"
+                      size="lg"
+                      className="border-primary hover:bg-primary/10"
+                    >
+                      LEADERBOARD
+                    </Button>
+                  </>
+                )}
+              </div>
+
               {/* Controls hint and power-ups - bottom right */}
               <div className="absolute -bottom-20 right-0 space-y-2">
                 <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border text-xs text-muted-foreground">
                   <div>WASD / Arrows: Move</div>
-                  <div>Space: Shoot / Fever</div>
+                  <div>Space: Shoot / Fever{gameState.status === 'ready' ? ' / Start' : ''}</div>
                   <div>P: Pause</div>
                 </div>
                 

@@ -28,7 +28,7 @@ const createInitialPlayer = (): Player => ({
 });
 
 const createInitialState = (): GameState => ({
-  status: 'menu',
+  status: 'ready',
   player: createInitialPlayer(),
   enemies: [],
   bullets: [],
@@ -58,7 +58,7 @@ export const useGameState = () => {
     
     // Secret mode sequence: H B D
     const key = event.key.toLowerCase();
-    if (gameState.status === 'menu') {
+    if (gameState.status === 'ready') {
       secretSequence.current.push(key);
       if (secretSequence.current.length > 3) {
         secretSequence.current = secretSequence.current.slice(-3);
