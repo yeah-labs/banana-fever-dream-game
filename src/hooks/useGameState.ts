@@ -213,13 +213,14 @@ export const useGameState = () => {
           bullet.position.x < config.canvas.width + 10
         );
 
-      // Update enemies
+      // Update enemies with level-based speed
+      const enemySpeed = config.enemy.speed + (prev.level - 1) * 20;
       const updatedEnemies = prev.enemies
         .map(enemy => ({
           ...enemy,
           position: {
             x: enemy.position.x + enemy.velocity.x * deltaTime,
-            y: enemy.position.y + enemy.velocity.y * deltaTime
+            y: enemy.position.y + (enemy.velocity.y + enemySpeed - config.enemy.speed) * deltaTime
           }
         }))
         .filter(enemy => 
@@ -227,11 +228,22 @@ export const useGameState = () => {
           enemy.health > 0
         );
 
+      // Check player-enemy collisions
+      let playerDamaged = false;
+      if (!prev.player.invulnerable) {
+        updatedEnemies.forEach(enemy => {
+          if (checkCollision(prev.player, enemy)) {
+            playerDamaged = true;
+          }
+        });
+      }
+
       // Check bullet-enemy collisions
       const remainingBullets: Bullet[] = [];
       const remainingEnemies: Enemy[] = [];
       let scoreIncrease = 0;
       let feverIncrease = 0;
+      let enemiesKilled = 0;
 
       updatedBullets.forEach(bullet => {
         let bulletHit = false;
@@ -243,6 +255,7 @@ export const useGameState = () => {
               if (enemy.health <= 0) {
                 scoreIncrease += enemy.points;
                 feverIncrease += config.fever.buildRate;
+                enemiesKilled++;
               }
             }
           });
@@ -258,15 +271,42 @@ export const useGameState = () => {
         }
       });
 
+      // Wave progression logic
+      const totalEnemiesInWave = 5 + prev.wave; // Increase enemies per wave
+      const waveProgress = prev.waveProgress + enemiesKilled;
+      let newWave = prev.wave;
+      let newLevel = prev.level;
+      
+      if (waveProgress >= totalEnemiesInWave) {
+        newWave += 1;
+        const wavesPerLevel = 3 + Math.floor(prev.level / 2); // More waves per level as level increases
+        if (newWave > wavesPerLevel) {
+          newLevel += 1;
+          newWave = 1;
+        }
+      }
+
+      const newPlayer = {
+        ...prev.player,
+        score: prev.player.score + scoreIncrease,
+        feverMeter: Math.min(100, prev.player.feverMeter + feverIncrease)
+      };
+
+      if (playerDamaged) {
+        newPlayer.health = Math.max(0, newPlayer.health - 1);
+        newPlayer.invulnerable = true;
+        newPlayer.invulnerabilityTime = 2000; // 2 seconds of invulnerability
+      }
+
       return {
         ...prev,
         bullets: remainingBullets,
         enemies: remainingEnemies,
-        player: {
-          ...prev.player,
-          score: prev.player.score + scoreIncrease,
-          feverMeter: Math.min(100, prev.player.feverMeter + feverIncrease)
-        }
+        player: newPlayer,
+        wave: newWave,
+        level: newLevel,
+        waveProgress: waveProgress >= totalEnemiesInWave ? 0 : waveProgress,
+        shakeIntensity: playerDamaged ? 15 : prev.shakeIntensity
       };
     });
   }, [config, checkCollision]);
