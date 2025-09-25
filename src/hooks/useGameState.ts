@@ -101,31 +101,61 @@ export const useGameState = () => {
     }
   }, []);
 
+  // Helper function to handle enemy kills and scoring
+  const handleEnemyKill = useCallback((enemy: Enemy): { points: number, feverIncrease: number } => {
+    let points = enemy.points;
+    // Apply score doubler if active
+    if (activePowerUps.current.has('score-doubler')) {
+      points *= 2;
+    }
+    return {
+      points,
+      feverIncrease: config.fever.buildRate
+    };
+  }, [config.fever.buildRate]);
+
   const activateFever = useCallback(() => {
     if (gameState.player.feverMeter >= 100) {
       setGameState(prev => {
-        // Clear all normal enemies
+        let totalFeverScore = 0;
+        let totalFeverIncrease = 0;
+        let enemiesKilled = 0;
+
+        // Calculate score for enemies that will be killed by fever
         const updatedEnemies = prev.enemies.map(enemy => {
+          let newEnemy = { ...enemy };
+          
           if (enemy.type === 'normal') {
-            return { ...enemy, health: 0 };
+            // Normal enemies are killed instantly
+            if (enemy.health > 0) {
+              const killReward = handleEnemyKill(enemy);
+              totalFeverScore += killReward.points;
+              totalFeverIncrease += killReward.feverIncrease;
+              enemiesKilled++;
+            }
+            newEnemy.health = 0;
           } else if (enemy.type === 'mini-boss') {
-            return { ...enemy, health: Math.max(0, enemy.health - enemy.maxHealth * 0.5) };
+            newEnemy.health = Math.max(0, enemy.health - enemy.maxHealth * 0.5);
           } else if (enemy.type === 'boss') {
-            return { ...enemy, health: Math.max(0, enemy.health - enemy.maxHealth * 0.25) };
+            newEnemy.health = Math.max(0, enemy.health - enemy.maxHealth * 0.25);
           }
-          return enemy;
+          return newEnemy;
         });
 
         return {
           ...prev,
           enemies: updatedEnemies,
-          player: { ...prev.player, feverMeter: 0 },
+          player: { 
+            ...prev.player, 
+            feverMeter: 0,
+            score: prev.player.score + totalFeverScore
+          },
           shakeIntensity: 10,
           feversUsed: prev.feversUsed + 1
         };
       });
     }
-  }, [gameState.player.feverMeter]);
+  }, [gameState.player.feverMeter, handleEnemyKill]);
 
   // Collision detection
   const checkCollision = useCallback((obj1: any, obj2: any): boolean => {
@@ -423,13 +453,9 @@ export const useGameState = () => {
               enemy.health -= bullet.damage;
               if (enemy.health <= 0 && !killedEnemyIds.has(enemy.id)) {
                 killedEnemyIds.add(enemy.id);
-                let points = enemy.points;
-                // Apply score doubler if active
-                if (activePowerUps.current.has('score-doubler')) {
-                  points *= 2;
-                }
-                scoreIncrease += points;
-                feverIncrease += config.fever.buildRate;
+                const killReward = handleEnemyKill(enemy);
+                scoreIncrease += killReward.points;
+                feverIncrease += killReward.feverIncrease;
                 enemiesKilled++;
               }
             }
