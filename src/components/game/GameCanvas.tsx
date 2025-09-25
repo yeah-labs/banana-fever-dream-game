@@ -133,22 +133,79 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
       };
 
       ctx.fillStyle = rarityColors[powerUp.rarity];
-      ctx.fillRect(
-        powerUp.position.x,
-        powerUp.position.y,
-        powerUp.width,
-        powerUp.height
-      );
-
-      // Add glow effect for rare items
-      if (powerUp.rarity !== 'common') {
-        ctx.shadowColor = rarityColors[powerUp.rarity];
-        ctx.shadowBlur = 8;
+      
+      // Draw different shapes based on power-up type
+      if (powerUp.type === 'spread-shot') {
+        // Three small circles for spread shot
+        const radius = powerUp.width / 6;
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.arc(
+            powerUp.position.x + powerUp.width / 2 + (i - 1) * radius * 2,
+            powerUp.position.y + powerUp.height / 2,
+            radius,
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+        }
+      } else if (powerUp.type === 'shield') {
+        // Pentagon shape for shield
+        ctx.beginPath();
+        const centerX = powerUp.position.x + powerUp.width / 2;
+        const centerY = powerUp.position.y + powerUp.height / 2;
+        const radius = powerUp.width / 2;
+        for (let i = 0; i < 5; i++) {
+          const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+          const x = centerX + radius * Math.cos(angle);
+          const y = centerY + radius * Math.sin(angle);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fill();
+      } else if (powerUp.type === 'sword') {
+        // Sword shape (rectangle with triangle tip)
+        const centerX = powerUp.position.x + powerUp.width / 2;
+        const centerY = powerUp.position.y + powerUp.height / 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX, powerUp.position.y);
+        ctx.lineTo(centerX - 3, powerUp.position.y + 6);
+        ctx.lineTo(centerX + 3, powerUp.position.y + 6);
+        ctx.lineTo(centerX + 2, powerUp.position.y + powerUp.height);
+        ctx.lineTo(centerX - 2, powerUp.position.y + powerUp.height);
+        ctx.closePath();
+        ctx.fill();
+      } else if (powerUp.type === 'magnet') {
+        // U-shape for magnet
+        ctx.beginPath();
+        ctx.arc(powerUp.position.x + 4, powerUp.position.y + powerUp.height / 2, 4, Math.PI, 0);
+        ctx.arc(powerUp.position.x + powerUp.width - 4, powerUp.position.y + powerUp.height / 2, 4, Math.PI, 0);
+        ctx.stroke();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = rarityColors[powerUp.rarity];
+        ctx.stroke();
+        ctx.lineWidth = 1;
+      } else {
+        // Default: rectangle for other types
         ctx.fillRect(
           powerUp.position.x,
           powerUp.position.y,
           powerUp.width,
           powerUp.height
+        );
+      }
+
+      // Add glow effect for rare items
+      if (powerUp.rarity !== 'common') {
+        ctx.shadowColor = rarityColors[powerUp.rarity];
+        ctx.shadowBlur = powerUp.rarity === 'legendary' ? 15 : 
+                        powerUp.rarity === 'epic' ? 12 : 8;
+        ctx.fillRect(
+          powerUp.position.x - 2,
+          powerUp.position.y - 2,
+          powerUp.width + 4,
+          powerUp.height + 4
         );
         ctx.shadowBlur = 0;
       }

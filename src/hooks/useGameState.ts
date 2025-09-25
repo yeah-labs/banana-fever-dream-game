@@ -49,6 +49,8 @@ export const useGameState = () => {
   const keysPressed = useRef<Set<string>>(new Set());
   const animationFrameRef = useRef<number>();
   const secretSequence = useRef<string[]>([]);
+  const lastPowerUpSpawn = useRef<number>(0);
+  const activePowerUps = useRef<Map<string, { type: PowerUp['type'], endTime: number }>>(new Map());
 
   // Input handling
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
@@ -132,7 +134,72 @@ export const useGameState = () => {
     );
   }, []);
 
-  // Shooting logic
+  // Power-up spawning with rarity system
+  const spawnRandomPowerUp = useCallback(() => {
+    const currentTime = performance.now();
+    const spawnInterval = 8000; // Spawn every 8 seconds
+    
+    if (currentTime - lastPowerUpSpawn.current < spawnInterval) return;
+    
+    lastPowerUpSpawn.current = currentTime;
+    
+    // Rarity-based weighted selection
+    const powerUpPool = [
+      // Common (60% total)
+      { type: 'spread-shot' as const, rarity: 'common' as const, weight: 30 },
+      { type: 'shield' as const, rarity: 'common' as const, weight: 30 },
+      // Uncommon (25%)
+      { type: 'score-doubler' as const, rarity: 'uncommon' as const, weight: 25 },
+      // Rare (10%)
+      { type: 'magnet' as const, rarity: 'rare' as const, weight: 10 },
+      // Epic (4%)
+      { type: 'sword' as const, rarity: 'epic' as const, weight: 4 },
+      // Legendary (1%)
+      { type: 'reality-warp' as const, rarity: 'legendary' as const, weight: 1 }
+    ];
+    
+    const totalWeight = powerUpPool.reduce((sum, item) => sum + item.weight, 0);
+    let random = Math.random() * totalWeight;
+    
+    let selectedPowerUp = powerUpPool[0];
+    for (const powerUp of powerUpPool) {
+      random -= powerUp.weight;
+      if (random <= 0) {
+        selectedPowerUp = powerUp;
+        break;
+      }
+    }
+    
+    setGameState(prev => {
+      const newPowerUp: PowerUp = {
+        id: `powerup-${Date.now()}`,
+        position: {
+          x: Math.random() * (config.canvas.width - 20),
+          y: -20
+        },
+        velocity: { x: 0, y: 80 },
+        width: 20,
+        height: 20,
+        health: 1,
+        maxHealth: 1,
+        type: selectedPowerUp.type,
+        rarity: selectedPowerUp.rarity,
+        duration: selectedPowerUp.type === 'shield' ? 5000 : 
+                  selectedPowerUp.type === 'score-doubler' ? 8000 :
+                  selectedPowerUp.type === 'magnet' ? 10000 :
+                  selectedPowerUp.type === 'sword' ? 5000 :
+                  selectedPowerUp.type === 'reality-warp' ? 10000 : 5000,
+        effect: {}
+      };
+      
+      return {
+        ...prev,
+        powerUps: [...prev.powerUps, newPowerUp]
+      };
+    });
+  }, [config]);
+
+  // Shooting logic with power-up effects
   const lastShotTime = useRef<number>(0);
 
   const shoot = useCallback(() => {
@@ -141,25 +208,58 @@ export const useGameState = () => {
     
     lastShotTime.current = currentTime;
     setGameState(prev => {
-      const newBullet: Bullet = {
-        id: `bullet-${Date.now()}`,
-        position: {
-          x: prev.player.position.x + prev.player.width / 2 - 2,
-          y: prev.player.position.y
-        },
-        velocity: { x: 0, y: -config.player.bulletSpeed },
-        width: 4,
-        height: 8,
-        health: 1,
-        maxHealth: 1,
-        damage: 1,
-        isPlayerBullet: true,
-        type: 'normal'
-      };
+      const newBullets: Bullet[] = [];
+      
+      // Check for spread shot
+      const hasSpreadShot = activePowerUps.current.has('spread-shot');
+      const hasSword = activePowerUps.current.has('sword');
+      
+      if (hasSpreadShot) {
+        // Three bullet spread
+        for (let i = -1; i <= 1; i++) {
+          const newBullet: Bullet = {
+            id: `bullet-${Date.now()}-${i}`,
+            position: {
+              x: prev.player.position.x + prev.player.width / 2 - 2,
+              y: prev.player.position.y
+            },
+            velocity: { 
+              x: i * 50, // Spread bullets horizontally
+              y: -config.player.bulletSpeed 
+            },
+            width: 4,
+            height: 8,
+            health: 1,
+            maxHealth: 1,
+            damage: hasSword ? 3 : 1,
+            isPlayerBullet: true,
+            type: hasSword ? 'sword' : 'normal'
+          };
+          newBullets.push(newBullet);
+        }
+      } else {
+        // Single bullet
+        const newBullet: Bullet = {
+          id: `bullet-${Date.now()}`,
+          position: {
+            x: prev.player.position.x + prev.player.width / 2 - 2,
+            y: prev.player.position.y
+          },
+          velocity: { x: 0, y: -config.player.bulletSpeed },
+          width: hasSword ? 6 : 4,
+          height: hasSword ? 12 : 8,
+          health: 1,
+          maxHealth: 1,
+          damage: hasSword ? 3 : 1,
+          isPlayerBullet: true,
+          type: hasSword ? 'sword' : 'normal'
+        };
+        newBullets.push(newBullet);
+      }
 
       return {
         ...prev,
-        bullets: [...prev.bullets, newBullet]
+        bullets: [...prev.bullets, ...newBullets]
       };
     });
   }, [config]);
@@ -203,6 +303,14 @@ export const useGameState = () => {
   // Update game objects
   const updateGameObjects = useCallback((deltaTime: number) => {
     setGameState(prev => {
+      // Clean up expired power-ups
+      const currentTime = performance.now();
+      for (const [key, powerUp] of activePowerUps.current) {
+        if (currentTime > powerUp.endTime) {
+          activePowerUps.current.delete(key);
+        }
+      }
+
       // Update bullets
       const updatedBullets = prev.bullets
         .map(bullet => ({
@@ -219,6 +327,36 @@ export const useGameState = () => {
           bullet.position.x < config.canvas.width + 10
         );
 
+      // Update power-ups with magnet effect
+      const hasMagnet = activePowerUps.current.has('magnet');
+      const updatedPowerUps = prev.powerUps
+        .map(powerUp => {
+          let newVelocity = { ...powerUp.velocity };
+          
+          if (hasMagnet) {
+            // Pull power-ups toward player if within magnet radius
+            const dx = prev.player.position.x - powerUp.position.x;
+            const dy = prev.player.position.y - powerUp.position.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < config.powerUp.magnetRadius && distance > 0) {
+              const magnetStrength = 200;
+              newVelocity.x += (dx / distance) * magnetStrength;
+              newVelocity.y += (dy / distance) * magnetStrength;
+            }
+          }
+          
+          return {
+            ...powerUp,
+            position: {
+              x: powerUp.position.x + newVelocity.x * deltaTime,
+              y: powerUp.position.y + newVelocity.y * deltaTime
+            },
+            velocity: newVelocity
+          };
+        })
+        .filter(powerUp => powerUp.position.y < config.canvas.height + 50);
+
       // Update enemies with level-based speed
       const enemySpeed = config.enemy.speed + (prev.level - 1) * 20;
       const updatedEnemies = prev.enemies
@@ -234,9 +372,30 @@ export const useGameState = () => {
           enemy.health > 0
         );
 
+      // Check player-power-up collisions
+      const remainingPowerUps: PowerUp[] = [];
+      updatedPowerUps.forEach(powerUp => {
+        if (checkCollision(prev.player, powerUp)) {
+          // Collect power-up
+          const duration = powerUp.duration;
+          const endTime = currentTime + duration;
+          activePowerUps.current.set(powerUp.type, { type: powerUp.type, endTime });
+          
+          // Apply immediate effects
+          if (powerUp.type === 'shield') {
+            // Shield effect handled in damage calculation
+          } else if (powerUp.type === 'reality-warp') {
+            // Special reality warp effects can be added here
+          }
+        } else {
+          remainingPowerUps.push(powerUp);
+        }
+      });
+
       // Check player-enemy collisions
       let playerDamaged = false;
-      if (!prev.player.invulnerable) {
+      const hasShield = activePowerUps.current.has('shield');
+      if (!prev.player.invulnerable && !hasShield) {
         updatedEnemies.forEach(enemy => {
           if (checkCollision(prev.player, enemy)) {
             playerDamaged = true;
@@ -259,7 +418,12 @@ export const useGameState = () => {
               bulletHit = true;
               enemy.health -= bullet.damage;
               if (enemy.health <= 0) {
-                scoreIncrease += enemy.points;
+                let points = enemy.points;
+                // Apply score doubler if active
+                if (activePowerUps.current.has('score-doubler')) {
+                  points *= 2;
+                }
+                scoreIncrease += points;
                 feverIncrease += config.fever.buildRate;
                 enemiesKilled++;
               }
@@ -271,32 +435,10 @@ export const useGameState = () => {
         }
       });
 
-      // Create power-ups from killed enemies
-      const newPowerUps: PowerUp[] = [];
+      // Filter out dead enemies (no more power-up drops from enemy deaths)
       updatedEnemies.forEach(enemy => {
         if (enemy.health > 0) {
           remainingEnemies.push(enemy);
-        } else {
-          // Chance to drop power-up
-          if (Math.random() < config.powerUp.dropRate) {
-            const powerUpTypes: PowerUp['type'][] = ['spread-shot', 'shield', 'score-doubler', 'magnet'];
-            const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
-            
-            const newPowerUp: PowerUp = {
-              id: `powerup-${Date.now()}-${enemy.id}`,
-              position: { ...enemy.position },
-              velocity: { x: 0, y: 50 },
-              width: 20,
-              height: 20,
-              health: 1,
-              maxHealth: 1,
-              type: randomType,
-              rarity: 'common',
-              duration: 5000,
-              effect: {}
-            };
-            newPowerUps.push(newPowerUp);
-          }
         }
       });
 
@@ -331,7 +473,7 @@ export const useGameState = () => {
         ...prev,
         bullets: remainingBullets,
         enemies: remainingEnemies,
-        powerUps: [...prev.powerUps, ...newPowerUps],
+        powerUps: remainingPowerUps,
         player: newPlayer,
         wave: newWave,
         level: newLevel,
@@ -393,6 +535,7 @@ export const useGameState = () => {
       updatePlayer(deltaTime);
       updateGameObjects(deltaTime);
       spawnEnemy();
+      spawnRandomPowerUp();
       
       setGameState(prev => ({
         ...prev,
