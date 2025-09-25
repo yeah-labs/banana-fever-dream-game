@@ -36,6 +36,7 @@ const createInitialState = (): GameState => ({
   level: 1,
   wave: 1,
   waveProgress: 0,
+  totalWaves: 0,
   lastEnemySpawn: 0,
   gameTime: 0,
   secretMode: false,
@@ -409,6 +410,7 @@ export const useGameState = () => {
       let scoreIncrease = 0;
       let feverIncrease = 0;
       let enemiesKilled = 0;
+      const killedEnemyIds = new Set<string>(); // Track killed enemies to prevent multiple scoring
 
       updatedBullets.forEach(bullet => {
         let bulletHit = false;
@@ -417,7 +419,8 @@ export const useGameState = () => {
             if (!bulletHit && checkCollision(bullet, enemy)) {
               bulletHit = true;
               enemy.health -= bullet.damage;
-              if (enemy.health <= 0) {
+              if (enemy.health <= 0 && !killedEnemyIds.has(enemy.id)) {
+                killedEnemyIds.add(enemy.id);
                 let points = enemy.points;
                 // Apply score doubler if active
                 if (activePowerUps.current.has('score-doubler')) {
@@ -447,9 +450,11 @@ export const useGameState = () => {
       const waveProgress = prev.waveProgress + enemiesKilled;
       let newWave = prev.wave;
       let newLevel = prev.level;
+      let newTotalWaves = prev.totalWaves;
       
       if (waveProgress >= totalEnemiesInWave) {
         newWave += 1;
+        newTotalWaves += 1; // Increment total waves
         const wavesPerLevel = 3 + Math.floor(prev.level / 2); // More waves per level as level increases
         if (newWave > wavesPerLevel) {
           newLevel += 1;
@@ -477,6 +482,7 @@ export const useGameState = () => {
         player: newPlayer,
         wave: newWave,
         level: newLevel,
+        totalWaves: newTotalWaves,
         waveProgress: waveProgress >= totalEnemiesInWave ? 0 : waveProgress,
         shakeIntensity: playerDamaged ? 15 : prev.shakeIntensity
       };

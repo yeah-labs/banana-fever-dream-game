@@ -49,7 +49,7 @@ export const GameOver: React.FC<GameOverProps> = ({
         {/* Game Over Title */}
         <div className="text-center space-y-4">
           <h1 className="text-5xl font-bold text-destructive animate-pulse">
-            FEVER DREAM ENDED
+            YOU WOKE UP
           </h1>
           {isNewHighScore && (
             <div className="text-2xl font-bold text-primary animate-bounce">
@@ -85,7 +85,7 @@ export const GameOver: React.FC<GameOverProps> = ({
                 <div className="text-sm text-muted-foreground">Level Reached</div>
               </div>
               <div className="space-y-1">
-                <div className="text-2xl font-bold text-foreground">{wave}</div>
+                <div className="text-2xl font-bold text-foreground">{gameState.totalWaves}</div>
                 <div className="text-sm text-muted-foreground">Waves Survived</div>
               </div>
               <div className="space-y-1">
@@ -150,19 +150,10 @@ export const GameOver: React.FC<GameOverProps> = ({
             size="lg"
             className="border-primary hover:bg-primary/10"
           >
-            MAIN MENU
+            HOME
           </Button>
         </div>
 
-        {/* Motivational Message */}
-        <div className="text-center space-y-2">
-          <p className="text-sm text-muted-foreground">
-            "Every fever dream is a chance to grow stronger."
-          </p>
-          <p className="text-xs text-muted-foreground opacity-60">
-            The swamp awaits your return...
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -55,6 +55,7 @@ export interface GameState {
   level: number;
   wave: number;
   waveProgress: number;
+  totalWaves: number;
   lastEnemySpawn: number;
   gameTime: number;
   secretMode: boolean;
