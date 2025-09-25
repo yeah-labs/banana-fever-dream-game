@@ -49,7 +49,7 @@ export const GameOver: React.FC<GameOverProps> = ({
         {/* Game Over Title */}
         <div className="text-center space-y-4">
           <h1 className="text-5xl font-bold text-destructive animate-pulse">
-            YOU WOKE UP
+            THE DREAM IS OVER
           </h1>
           {isNewHighScore && (
             <div className="text-2xl font-bold text-primary animate-bounce">
