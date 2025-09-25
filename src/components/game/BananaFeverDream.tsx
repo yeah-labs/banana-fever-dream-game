@@ -147,10 +147,10 @@ export const BananaFeverDream: React.FC = () => {
           <div className="min-h-screen bg-gradient-game flex flex-col items-center justify-start p-4">
             {/* UI above the game */}
             <div className="w-[800px] mb-4">
-              <div className="grid grid-cols-[2fr_1fr_2fr] gap-4 items-start">
+              <div className="grid grid-cols-[2fr_1fr_2fr] gap-4 items-stretch">
                 {/* Score and Level */}
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border">
-                  <div className="space-y-1">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border min-h-[100px] flex items-center">
+                  <div className="space-y-1 w-full">
                     <div className="text-2xl font-bold text-primary">
                       {gameState.player.score.toLocaleString()}
                     </div>
@@ -166,8 +166,8 @@ export const BananaFeverDream: React.FC = () => {
                 </div>
 
                 {/* Health */}
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border">
-                  <div className="flex flex-col items-center gap-2">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border min-h-[100px] flex items-center">
+                  <div className="flex flex-col items-center gap-2 w-full">
                     <span className="text-sm text-muted-foreground">Health</span>
                     <div className="flex gap-1">
                       {Array.from({ length: gameState.player.maxHealth }, (_, i) => (
@@ -185,7 +185,7 @@ export const BananaFeverDream: React.FC = () => {
                 </div>
 
                 {/* Fever Meter */}
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border min-h-[100px] flex items-center">
                   <div className="space-y-2">
                     {gameState.player.feverMeter < 100 && (
                       <>
@@ -225,7 +225,7 @@ export const BananaFeverDream: React.FC = () => {
             </div>
 
             {/* Game Canvas */}
-            <div className="relative">
+            <div className="relative mb-32">
               <GameCanvas gameState={gameState} config={config} />
               
               {gameState.status === 'paused' && (
@@ -239,7 +239,7 @@ export const BananaFeverDream: React.FC = () => {
               )}
 
               {/* Game Controls - bottom left */}
-              <div className="absolute -bottom-20 left-0 flex gap-2">
+              <div className="absolute -bottom-24 left-0 flex gap-2">
                 {gameState.status === 'ready' && (
                   <>
                     <Button
@@ -264,7 +264,7 @@ export const BananaFeverDream: React.FC = () => {
               </div>
 
               {/* Controls hint and power-ups - bottom right */}
-              <div className="absolute -bottom-20 right-0 space-y-2">
+              <div className="absolute -bottom-24 right-0 space-y-2">
                 <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border text-xs text-muted-foreground">
                   <div>WASD / Arrows: Move</div>
                   <div>Space: Shoot{gameState.status === 'ready' ? ' / Start' : ''}</div>
