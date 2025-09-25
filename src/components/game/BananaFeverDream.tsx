@@ -186,7 +186,7 @@ export const BananaFeverDream: React.FC = () => {
 
                 {/* Fever Meter */}
                 <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border min-h-[100px] flex items-center">
-                  <div className="space-y-2">
+                  <div className="space-y-2 w-full">
                     {gameState.player.feverMeter < 100 && (
                       <>
                         <div className="flex items-center justify-between">
