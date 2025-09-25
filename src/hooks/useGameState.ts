@@ -4,7 +4,7 @@ import { GameState, GameConfig, Player, Enemy, Bullet, PowerUp, Position } from 
 const DEFAULT_CONFIG: GameConfig = {
   canvas: { width: 800, height: 600 },
   player: { speed: 300, bulletSpeed: 400, fireRate: 200, maxHealth: 3 },
-  enemy: { speed: 50, bulletSpeed: 200, spawnRate: 2000 },
+  enemy: { speed: 50, bulletSpeed: 200, spawnRate: 800 },
   powerUp: { dropRate: 0.15, magnetRadius: 150 },
   fever: { 
     buildRate: 1, 
@@ -169,26 +169,32 @@ export const useGameState = () => {
     setGameState(prev => {
       if (performance.now() - prev.lastEnemySpawn < config.enemy.spawnRate) return prev;
 
-      const newEnemy: Enemy = {
-        id: `enemy-${Date.now()}`,
-        position: {
-          x: Math.random() * (config.canvas.width - 40),
-          y: -40
-        },
-        velocity: { x: 0, y: config.enemy.speed },
-        width: 30,
-        height: 30,
-        health: 1,
-        maxHealth: 1,
-        type: 'normal',
-        points: 100,
-        pattern: 'straight',
-        lastShot: 0
-      };
+      const newEnemies: Enemy[] = [];
+      const enemiesPerSpawn = Math.min(2, Math.floor(prev.level / 2) + 1); // 1-2 enemies per spawn based on level
+      
+      for (let i = 0; i < enemiesPerSpawn; i++) {
+        const newEnemy: Enemy = {
+          id: `enemy-${Date.now()}-${i}`,
+          position: {
+            x: Math.random() * (config.canvas.width - 40),
+            y: -40 - (i * 50) // Stagger spawn positions
+          },
+          velocity: { x: 0, y: config.enemy.speed },
+          width: 30,
+          height: 30,
+          health: 1,
+          maxHealth: 1,
+          type: 'normal',
+          points: 100,
+          pattern: 'straight',
+          lastShot: 0
+        };
+        newEnemies.push(newEnemy);
+      }
 
       return {
         ...prev,
-        enemies: [...prev.enemies, newEnemy],
+        enemies: [...prev.enemies, ...newEnemies],
         lastEnemySpawn: performance.now()
       };
     });
@@ -265,9 +271,32 @@ export const useGameState = () => {
         }
       });
 
+      // Create power-ups from killed enemies
+      const newPowerUps: PowerUp[] = [];
       updatedEnemies.forEach(enemy => {
         if (enemy.health > 0) {
           remainingEnemies.push(enemy);
+        } else {
+          // Chance to drop power-up
+          if (Math.random() < config.powerUp.dropRate) {
+            const powerUpTypes: PowerUp['type'][] = ['spread-shot', 'shield', 'score-doubler', 'magnet'];
+            const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+            
+            const newPowerUp: PowerUp = {
+              id: `powerup-${Date.now()}-${enemy.id}`,
+              position: { ...enemy.position },
+              velocity: { x: 0, y: 50 },
+              width: 20,
+              height: 20,
+              health: 1,
+              maxHealth: 1,
+              type: randomType,
+              rarity: 'common',
+              duration: 5000,
+              effect: {}
+            };
+            newPowerUps.push(newPowerUp);
+          }
         }
       });
 
@@ -302,6 +331,7 @@ export const useGameState = () => {
         ...prev,
         bullets: remainingBullets,
         enemies: remainingEnemies,
+        powerUps: [...prev.powerUps, ...newPowerUps],
         player: newPlayer,
         wave: newWave,
         level: newLevel,
