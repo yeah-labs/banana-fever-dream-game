@@ -30,7 +30,12 @@ export const BananaFeverDream: React.FC = () => {
           event.preventDefault();
           if (gameState.status === 'ready') {
             handleStartGame();
-          } else if (gameState.status === 'playing') {
+          }
+          break;
+        
+        case 'f':
+          event.preventDefault();
+          if (gameState.status === 'playing') {
             if (gameState.player.feverMeter >= 100) {
               activateFever();
               toast.success('🍌 BANANA FEVER ACTIVATED!', {
@@ -182,26 +187,27 @@ export const BananaFeverDream: React.FC = () => {
                 {/* Fever Meter */}
                 <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border">
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">
-                        Banana Fever
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {Math.floor(gameState.player.feverMeter)}%
-                      </span>
-                    </div>
-                    
-                    <div className="relative">
-                      <div className="w-full bg-muted/50 rounded-full h-3">
-                        <div 
-                          className="bg-gradient-fever h-3 rounded-full transition-all duration-300"
-                          style={{ width: `${gameState.player.feverMeter}%` }}
-                        />
-                      </div>
-                      {gameState.player.feverMeter >= 100 && (
-                        <div className="absolute inset-0 bg-gradient-fever rounded-full animate-fever-build opacity-80" />
-                      )}
-                    </div>
+                    {gameState.player.feverMeter < 100 && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-foreground">
+                            Banana Fever
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {Math.floor(gameState.player.feverMeter)}%
+                          </span>
+                        </div>
+                        
+                        <div className="relative">
+                          <div className="w-full bg-muted/50 rounded-full h-3">
+                            <div 
+                              className="bg-gradient-fever h-3 rounded-full transition-all duration-300"
+                              style={{ width: `${gameState.player.feverMeter}%` }}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
 
                     {gameState.player.feverMeter >= 100 && (
                       <button
@@ -210,7 +216,7 @@ export const BananaFeverDream: React.FC = () => {
                                  rounded-md py-1 px-2 font-bold text-xs transition-all duration-200
                                  shadow-fever animate-pulse-banana"
                       >
-                        ACTIVATE FEVER! (SPACE)
+                        ACTIVATE FEVER!
                       </button>
                     )}
                   </div>
@@ -261,7 +267,8 @@ export const BananaFeverDream: React.FC = () => {
               <div className="absolute -bottom-20 right-0 space-y-2">
                 <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border text-xs text-muted-foreground">
                   <div>WASD / Arrows: Move</div>
-                  <div>Space: Shoot / Fever{gameState.status === 'ready' ? ' / Start' : ''}</div>
+                  <div>Space: Shoot{gameState.status === 'ready' ? ' / Start' : ''}</div>
+                  <div>F: Fever</div>
                   <div>P: Pause</div>
                 </div>
                 
