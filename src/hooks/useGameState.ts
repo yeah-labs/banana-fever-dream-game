@@ -87,6 +87,14 @@ export const useGameState = () => {
     }));
   }, []);
 
+  const resetToReady = useCallback(() => {
+    setGameState(prev => ({
+      ...createInitialState(),
+      status: 'ready',
+      secretMode: prev.secretMode
+    }));
+  }, []);
+
   const pauseGame = useCallback(() => {
     setGameState(prev => ({ 
       ...prev, 
@@ -611,6 +619,7 @@ export const useGameState = () => {
     gameState,
     config,
     startGame,
+    resetToReady,
     pauseGame,
     gameOver,
     activateFever,

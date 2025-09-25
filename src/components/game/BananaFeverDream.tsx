@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 export const BananaFeverDream: React.FC = () => {
-  const { gameState, config, startGame, pauseGame, gameOver, activateFever } = useGameState();
+  const { gameState, config, startGame, resetToReady, pauseGame, gameOver, activateFever } = useGameState();
   const [highScore, setHighScore] = useState(0);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
 
@@ -122,6 +122,18 @@ export const BananaFeverDream: React.FC = () => {
     });
   };
 
+  const handleResetToReady = () => {
+    resetToReady();
+    setIsNewHighScore(false);
+    toast.success('Game reset - Ready to play!', {
+      duration: 2000,
+      style: { 
+        background: 'hsl(200, 40%, 35%)', 
+        color: 'hsl(45, 100%, 85%)'
+      }
+    });
+  };
+
   const handleMainMenu = () => {
     // Reset to ready state instead of reloading
     setIsNewHighScore(false);
@@ -134,7 +146,7 @@ export const BananaFeverDream: React.FC = () => {
         return (
           <GameOver
             gameState={gameState}
-            onRestart={handleStartGame}
+            onRestart={handleResetToReady}
             onMainMenu={handleMainMenu}
             isNewHighScore={isNewHighScore}
           />
