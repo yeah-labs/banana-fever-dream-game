@@ -96,9 +96,9 @@ export const GameOver: React.FC<GameOverProps> = ({
               </div>
               <div className="space-y-1">
                 <div className="text-2xl font-bold text-foreground">
-                  {Math.floor(player.feverMeter)}%
+                  {gameState.feversUsed}
                 </div>
-                <div className="text-sm text-muted-foreground">Final Fever</div>
+                <div className="text-sm text-muted-foreground">Fevers Used</div>
               </div>
             </div>
 

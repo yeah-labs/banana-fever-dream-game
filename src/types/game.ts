@@ -61,6 +61,7 @@ export interface GameState {
   secretMode: boolean;
   shakeIntensity: number;
   lastFrame: number;
+  feversUsed: number;
 }
 
 export interface GameConfig {

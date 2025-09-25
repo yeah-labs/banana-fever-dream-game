@@ -41,7 +41,8 @@ const createInitialState = (): GameState => ({
   gameTime: 0,
   secretMode: false,
   shakeIntensity: 0,
-  lastFrame: 0
+  lastFrame: 0,
+  feversUsed: 0
 });
 
 export const useGameState = () => {
@@ -119,7 +120,8 @@ export const useGameState = () => {
           ...prev,
           enemies: updatedEnemies,
           player: { ...prev.player, feverMeter: 0 },
-          shakeIntensity: 10
+          shakeIntensity: 10,
+          feversUsed: prev.feversUsed + 1
         };
       });
     }
