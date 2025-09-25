@@ -237,7 +237,7 @@ export const BananaFeverDream: React.FC = () => {
             </div>
 
             {/* Game Canvas */}
-            <div className="relative mb-32">
+            <div className="relative">
               <GameCanvas gameState={gameState} config={config} />
               
               {gameState.status === 'paused' && (
@@ -249,34 +249,33 @@ export const BananaFeverDream: React.FC = () => {
                   </div>
                 </div>
               )}
+            </div>
 
-              {/* Game Controls - bottom left */}
-              <div className="absolute -bottom-24 left-0 flex gap-2 items-start">
-                {gameState.status === 'ready' && (
-                  <>
-                    <Button
-                      onClick={handleStartGame}
-                      size="lg"
-                      className="bg-gradient-banana hover:shadow-fever 
-                               transition-all duration-300 transform hover:scale-105
-                               border-2 border-primary-glow"
-                    >
-                      START GAME
-                    </Button>
-                    <Button
-                      onClick={() => toast.info('Leaderboard coming soon!')}
-                      variant="outline"
-                      size="lg"
-                      className="border-primary hover:bg-primary/10"
-                    >
-                      LEADERBOARD
-                    </Button>
-                  </>
-                )}
+            {/* Unified Bottom Area */}
+            <div className="w-[800px] mt-8 flex justify-between items-start">
+              {/* Game Controls - left side */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={gameState.status === 'ready' ? handleStartGame : handleResetToReady}
+                  size="lg"
+                  className="bg-gradient-banana hover:shadow-fever 
+                           transition-all duration-300 transform hover:scale-105
+                           border-2 border-primary-glow"
+                >
+                  {gameState.status === 'ready' ? 'START GAME' : 'END GAME'}
+                </Button>
+                <Button
+                  onClick={() => toast.info('Leaderboard coming soon!')}
+                  variant="outline"
+                  size="lg"
+                  className="border-primary hover:bg-primary/10"
+                >
+                  LEADERBOARD
+                </Button>
               </div>
 
-              {/* Controls hint and power-ups - bottom right */}
-              <div className="absolute -bottom-24 right-0 flex flex-col items-start gap-2">
+              {/* Controls hint and power-ups - right side */}
+              <div className="flex flex-col items-start gap-2">
                 <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border text-xs text-muted-foreground">
                   <div>WASD / Arrows: Move</div>
                   <div>Space: Shoot{gameState.status === 'ready' ? ' / Start' : ''}</div>
