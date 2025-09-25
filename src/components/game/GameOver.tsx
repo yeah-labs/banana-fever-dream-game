@@ -145,12 +145,11 @@ export const GameOver: React.FC<GameOverProps> = ({
             PLAY AGAIN
           </Button>
           <Button
-            onClick={onMainMenu}
-            variant="outline"
+            variant="placeholder"
             size="lg"
-            className="border-primary hover:bg-primary/10"
+            disabled
           >
-            HOME
+            HOME (Coming Soon)
           </Button>
         </div>
 
