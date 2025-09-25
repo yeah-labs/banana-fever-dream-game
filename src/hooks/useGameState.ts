@@ -132,6 +132,145 @@ export const useGameState = () => {
     );
   }, []);
 
+  // Shooting logic
+  const lastShotTime = useRef<number>(0);
+
+  const shoot = useCallback(() => {
+    const currentTime = performance.now();
+    if (currentTime - lastShotTime.current < config.player.fireRate) return;
+    
+    lastShotTime.current = currentTime;
+    setGameState(prev => {
+      const newBullet: Bullet = {
+        id: `bullet-${Date.now()}`,
+        position: {
+          x: prev.player.position.x + prev.player.width / 2 - 2,
+          y: prev.player.position.y
+        },
+        velocity: { x: 0, y: -config.player.bulletSpeed },
+        width: 4,
+        height: 8,
+        health: 1,
+        maxHealth: 1,
+        damage: 1,
+        isPlayerBullet: true,
+        type: 'normal'
+      };
+
+      return {
+        ...prev,
+        bullets: [...prev.bullets, newBullet]
+      };
+    });
+  }, [config]);
+
+  // Enemy spawning logic
+  const spawnEnemy = useCallback(() => {
+    setGameState(prev => {
+      if (performance.now() - prev.lastEnemySpawn < config.enemy.spawnRate) return prev;
+
+      const newEnemy: Enemy = {
+        id: `enemy-${Date.now()}`,
+        position: {
+          x: Math.random() * (config.canvas.width - 40),
+          y: -40
+        },
+        velocity: { x: 0, y: config.enemy.speed },
+        width: 30,
+        height: 30,
+        health: 1,
+        maxHealth: 1,
+        type: 'normal',
+        points: 100,
+        pattern: 'straight',
+        lastShot: 0
+      };
+
+      return {
+        ...prev,
+        enemies: [...prev.enemies, newEnemy],
+        lastEnemySpawn: performance.now()
+      };
+    });
+  }, [config]);
+
+  // Update game objects
+  const updateGameObjects = useCallback((deltaTime: number) => {
+    setGameState(prev => {
+      // Update bullets
+      const updatedBullets = prev.bullets
+        .map(bullet => ({
+          ...bullet,
+          position: {
+            x: bullet.position.x + bullet.velocity.x * deltaTime,
+            y: bullet.position.y + bullet.velocity.y * deltaTime
+          }
+        }))
+        .filter(bullet => 
+          bullet.position.y > -10 && 
+          bullet.position.y < config.canvas.height + 10 &&
+          bullet.position.x > -10 && 
+          bullet.position.x < config.canvas.width + 10
+        );
+
+      // Update enemies
+      const updatedEnemies = prev.enemies
+        .map(enemy => ({
+          ...enemy,
+          position: {
+            x: enemy.position.x + enemy.velocity.x * deltaTime,
+            y: enemy.position.y + enemy.velocity.y * deltaTime
+          }
+        }))
+        .filter(enemy => 
+          enemy.position.y < config.canvas.height + 50 && 
+          enemy.health > 0
+        );
+
+      // Check bullet-enemy collisions
+      const remainingBullets: Bullet[] = [];
+      const remainingEnemies: Enemy[] = [];
+      let scoreIncrease = 0;
+      let feverIncrease = 0;
+
+      updatedBullets.forEach(bullet => {
+        let bulletHit = false;
+        if (bullet.isPlayerBullet) {
+          updatedEnemies.forEach(enemy => {
+            if (!bulletHit && checkCollision(bullet, enemy)) {
+              bulletHit = true;
+              enemy.health -= bullet.damage;
+              if (enemy.health <= 0) {
+                scoreIncrease += enemy.points;
+                feverIncrease += config.fever.buildRate;
+              }
+            }
+          });
+        }
+        if (!bulletHit) {
+          remainingBullets.push(bullet);
+        }
+      });
+
+      updatedEnemies.forEach(enemy => {
+        if (enemy.health > 0) {
+          remainingEnemies.push(enemy);
+        }
+      });
+
+      return {
+        ...prev,
+        bullets: remainingBullets,
+        enemies: remainingEnemies,
+        player: {
+          ...prev.player,
+          score: prev.player.score + scoreIncrease,
+          feverMeter: Math.min(100, prev.player.feverMeter + feverIncrease)
+        }
+      };
+    });
+  }, [config, checkCollision]);
+
   // Update player position and actions
   const updatePlayer = useCallback((deltaTime: number) => {
     setGameState(prev => {
@@ -148,6 +287,11 @@ export const useGameState = () => {
       }
       if (keysPressed.current.has('s') || keysPressed.current.has('arrowdown')) {
         newVelocity.y = config.player.speed;
+      }
+
+      // Handle shooting
+      if (keysPressed.current.has(' ')) {
+        shoot();
       }
 
       const newPosition = {
@@ -169,7 +313,7 @@ export const useGameState = () => {
         shakeIntensity: Math.max(0, prev.shakeIntensity - deltaTime * 30)
       };
     });
-  }, [config, keysPressed]);
+  }, [config, keysPressed, shoot]);
 
   // Game loop
   const gameLoop = useCallback((timestamp: number) => {
@@ -177,6 +321,8 @@ export const useGameState = () => {
       const deltaTime = (timestamp - gameState.lastFrame) / 1000;
       
       updatePlayer(deltaTime);
+      updateGameObjects(deltaTime);
+      spawnEnemy();
       
       setGameState(prev => ({
         ...prev,
@@ -186,7 +332,7 @@ export const useGameState = () => {
       
       animationFrameRef.current = requestAnimationFrame(gameLoop);
     }
-  }, [gameState.status, gameState.lastFrame, updatePlayer]);
+  }, [gameState.status, gameState.lastFrame, updatePlayer, updateGameObjects, spawnEnemy]);
 
   // Start/stop game loop
   useEffect(() => {

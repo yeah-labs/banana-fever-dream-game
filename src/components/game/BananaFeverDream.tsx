@@ -143,10 +143,88 @@ export const BananaFeverDream: React.FC = () => {
       case 'playing':
       case 'paused':
         return (
-          <div className="min-h-screen bg-gradient-game flex items-center justify-center p-4">
+          <div className="min-h-screen bg-gradient-game flex flex-col items-center justify-start p-4">
+            {/* UI above the game */}
+            <div className="w-full max-w-4xl mb-4">
+              <div className="flex justify-between items-start gap-4">
+                {/* Score and Level */}
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border flex-1">
+                  <div className="space-y-1">
+                    <div className="text-2xl font-bold text-primary">
+                      {gameState.player.score.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Level {gameState.level} • Wave {gameState.wave}
+                    </div>
+                    {gameState.secretMode && (
+                      <div className="text-xs text-accent font-bold animate-pulse">
+                        🎉 PP MODE ACTIVE
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Health */}
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Health</span>
+                    <div className="flex gap-1">
+                      {Array.from({ length: gameState.player.maxHealth }, (_, i) => (
+                        <div
+                          key={i}
+                          className={`w-4 h-4 rounded-full border-2 ${
+                            i < gameState.player.health
+                              ? 'bg-primary border-primary shadow-banana'
+                              : 'border-muted bg-transparent'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fever Meter */}
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border flex-1">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-foreground">
+                        Banana Fever
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {Math.floor(gameState.player.feverMeter)}%
+                      </span>
+                    </div>
+                    
+                    <div className="relative">
+                      <div className="w-full bg-muted/50 rounded-full h-3">
+                        <div 
+                          className="bg-gradient-fever h-3 rounded-full transition-all duration-300"
+                          style={{ width: `${gameState.player.feverMeter}%` }}
+                        />
+                      </div>
+                      {gameState.player.feverMeter >= 100 && (
+                        <div className="absolute inset-0 bg-gradient-fever rounded-full animate-fever-build opacity-80" />
+                      )}
+                    </div>
+
+                    {gameState.player.feverMeter >= 100 && (
+                      <button
+                        onClick={activateFever}
+                        className="w-full bg-primary text-primary-foreground hover:bg-primary-glow 
+                                 rounded-md py-1 px-2 font-bold text-xs transition-all duration-200
+                                 shadow-fever animate-pulse-banana"
+                      >
+                        ACTIVATE FEVER! (SPACE)
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Game Canvas */}
             <div className="relative">
               <GameCanvas gameState={gameState} config={config} />
-              <GameUI gameState={gameState} onActivateFever={activateFever} />
               
               {gameState.status === 'paused' && (
                 <div className="absolute inset-0 bg-background/80 backdrop-blur-sm 
@@ -157,6 +235,44 @@ export const BananaFeverDream: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Controls hint and power-ups - bottom right */}
+              <div className="absolute -bottom-20 right-0 space-y-2">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border text-xs text-muted-foreground">
+                  <div>WASD / Arrows: Move</div>
+                  <div>Space: Shoot / Fever</div>
+                  <div>P: Pause</div>
+                </div>
+                
+                {/* Active Power-ups */}
+                {gameState.player.powerUps.length > 0 && (
+                  <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border">
+                    <div className="text-xs text-muted-foreground mb-2">Active Power-ups</div>
+                    <div className="flex gap-2 flex-wrap">
+                      {gameState.player.powerUps.map((powerUp, index) => {
+                        const rarityColors = {
+                          common: 'border-secondary bg-secondary/20',
+                          uncommon: 'border-blue-400 bg-blue-400/20',
+                          rare: 'border-powerup bg-powerup/20',
+                          epic: 'border-primary bg-primary/20',
+                          legendary: 'border-pink-400 bg-pink-400/20'
+                        };
+
+                        return (
+                          <div
+                            key={`${powerUp.type}-${index}`}
+                            className={`px-2 py-1 rounded text-xs font-medium border ${
+                              rarityColors[powerUp.rarity]
+                            }`}
+                          >
+                            {powerUp.type.replace('-', ' ')}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );
