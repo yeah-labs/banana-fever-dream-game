@@ -141,10 +141,10 @@ export const BananaFeverDream: React.FC = () => {
         return (
           <div className="min-h-screen bg-gradient-game flex flex-col items-center justify-start p-4">
             {/* UI above the game */}
-            <div className="w-full max-w-4xl mb-4">
-              <div className="flex justify-between items-start gap-4">
+            <div className="w-[800px] mb-4">
+              <div className="grid grid-cols-[2fr_1fr_2fr] gap-4 items-start">
                 {/* Score and Level */}
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border flex-1">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border">
                   <div className="space-y-1">
                     <div className="text-2xl font-bold text-primary">
                       {gameState.player.score.toLocaleString()}
@@ -162,7 +162,7 @@ export const BananaFeverDream: React.FC = () => {
 
                 {/* Health */}
                 <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col items-center gap-2">
                     <span className="text-sm text-muted-foreground">Health</span>
                     <div className="flex gap-1">
                       {Array.from({ length: gameState.player.maxHealth }, (_, i) => (
@@ -180,7 +180,7 @@ export const BananaFeverDream: React.FC = () => {
                 </div>
 
                 {/* Fever Meter */}
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border flex-1">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-foreground">
