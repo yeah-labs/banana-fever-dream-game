@@ -251,7 +251,7 @@ export const BananaFeverDream: React.FC = () => {
               )}
 
               {/* Game Controls - bottom left */}
-              <div className="absolute -bottom-24 left-0 flex gap-2">
+              <div className="absolute -bottom-24 left-0 flex gap-2 items-start">
                 {gameState.status === 'ready' && (
                   <>
                     <Button
@@ -276,7 +276,7 @@ export const BananaFeverDream: React.FC = () => {
               </div>
 
               {/* Controls hint and power-ups - bottom right */}
-              <div className="absolute -bottom-24 right-0 space-y-2">
+              <div className="absolute -bottom-24 right-0 flex flex-col items-start gap-2">
                 <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border text-xs text-muted-foreground">
                   <div>WASD / Arrows: Move</div>
                   <div>Space: Shoot{gameState.status === 'ready' ? ' / Start' : ''}</div>
