@@ -250,10 +250,11 @@ export const BananaFeverDream: React.FC = () => {
                 </div>
               )}
 
-              {/* Game Controls - bottom left */}
-              <div className="absolute -bottom-24 left-0 flex gap-2">
+              {/* Bottom section with controls and hints */}
+              <div className="absolute -bottom-24 left-0 right-0 flex items-start gap-6">
+                {/* Game Controls */}
                 {gameState.status === 'ready' && (
-                  <>
+                  <div className="flex flex-col gap-2">
                     <Button
                       onClick={handleStartGame}
                       size="lg"
@@ -271,21 +272,27 @@ export const BananaFeverDream: React.FC = () => {
                     >
                       LEADERBOARD
                     </Button>
-                  </>
+                  </div>
                 )}
+
+                {/* Controls hint - wider with two columns */}
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border text-xs text-muted-foreground w-96">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <div>WASD / Arrows: Move</div>
+                      <div>F: Fever</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div>Space: Shoot{gameState.status === 'ready' ? ' / Start' : ''}</div>
+                      <div>P: Pause</div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Controls hint and power-ups - bottom right */}
-              <div className="absolute -bottom-24 right-0 space-y-2">
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border text-xs text-muted-foreground">
-                  <div>WASD / Arrows: Move</div>
-                  <div>Space: Shoot{gameState.status === 'ready' ? ' / Start' : ''}</div>
-                  <div>F: Fever</div>
-                  <div>P: Pause</div>
-                </div>
-                
-                {/* Active Power-ups */}
-                {gameState.player.powerUps.length > 0 && (
+              {/* Active Power-ups - positioned above the hints */}
+              {gameState.player.powerUps.length > 0 && (
+                <div className="absolute -bottom-32 right-0">
                   <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border">
                     <div className="text-xs text-muted-foreground mb-2">Active Power-ups</div>
                     <div className="flex gap-2 flex-wrap">
@@ -311,8 +318,8 @@ export const BananaFeverDream: React.FC = () => {
                       })}
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         );
