@@ -26,7 +26,7 @@ export const GameMenu: React.FC<GameMenuProps> = ({
           </p>
           {secretMode && (
             <div className="text-lg text-accent font-bold animate-bounce">
-              🎉 PP MODE UNLOCKED! 🎉
+              🎂 PP MODE UNLOCKED! 🎂
             </div>
           )}
         </div>

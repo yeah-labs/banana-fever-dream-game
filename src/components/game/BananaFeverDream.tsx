@@ -100,10 +100,10 @@ export const BananaFeverDream: React.FC = () => {
   // Secret mode activation toast
   useEffect(() => {
     if (gameState.secretMode) {
-      toast.success('🎉 PP MODE ACTIVATED! 🎉', {
+      toast.success('🎂 PP MODE ACTIVATED! 🎂', {
         duration: 3000,
         style: { 
-          background: 'hsl(280, 100%, 70%)', 
+          background: 'hsl(220, 80%, 60%)', 
           color: 'hsl(230, 15%, 8%)',
           fontWeight: 'bold'
         }
@@ -171,7 +171,7 @@ export const BananaFeverDream: React.FC = () => {
                     </div>
                     {gameState.secretMode && (
                       <div className="text-xs text-accent font-bold animate-pulse">
-                        🎉 PP MODE ACTIVE
+                        🎂 PPMAN MODE ACTIVE
                       </div>
                     )}
                   </div>

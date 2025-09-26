@@ -55,7 +55,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
     // Draw enemies
     gameState.enemies.forEach(enemy => {
       const color = gameState.secretMode ? 
-        'hsl(120, 40%, 35%)' : // Green for easter egg mode
+        'hsl(220, 70%, 50%)' : // Blue for easter egg mode
         enemy.type === 'boss' ? 'hsl(350, 80%, 40%)' :
         enemy.type === 'mini-boss' ? 'hsl(15, 70%, 45%)' :
         'hsl(0, 80%, 55%)';
