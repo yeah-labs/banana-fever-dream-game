@@ -305,32 +305,87 @@ export const useGameState = () => {
     });
   }, [config]);
 
-  // Enemy spawning logic
+  // Enemy spawning logic with escalating threat system
   const spawnEnemy = useCallback(() => {
     setGameState(prev => {
       if (performance.now() - prev.lastEnemySpawn < config.enemy.spawnRate) return prev;
 
       const newEnemies: Enemy[] = [];
-      const enemiesPerSpawn = Math.min(2, Math.floor(prev.level / 2) + 1); // 1-2 enemies per spawn based on level
       
-      for (let i = 0; i < enemiesPerSpawn; i++) {
-        const newEnemy: Enemy = {
-          id: `enemy-${Date.now()}-${i}`,
+      // Escalating threat boss spawning system
+      const calculateBossChance = (baseChance: number, maxChance: number, levelBonus: number, waveBonus: number) => {
+        const chance = baseChance + (prev.level - 1) * levelBonus + (prev.wave - 1) * waveBonus;
+        return Math.min(chance, maxChance);
+      };
+      
+      const miniBossChance = calculateBossChance(1, 8, 0.5, 0.2); // 1% → 8% cap
+      const bossChance = calculateBossChance(0.2, 4, 0.3, 0.1); // 0.2% → 4% cap
+      
+      const random = Math.random() * 100;
+      
+      // Check for boss spawning (bosses are rarest)
+      if (random < bossChance) {
+        const boss: Enemy = {
+          id: `boss-${Date.now()}`,
           position: {
-            x: Math.random() * (config.canvas.width - 40),
-            y: -40 - (i * 50) // Stagger spawn positions
+            x: Math.random() * (config.canvas.width - 80),
+            y: -80
           },
-          velocity: { x: 0, y: config.enemy.speed },
-          width: 30,
-          height: 30,
-          health: 1,
-          maxHealth: 1,
-          type: 'normal',
-          points: 100,
-          pattern: 'straight',
+          velocity: { x: 50, y: config.enemy.speed * 0.6 }, // Slower but stronger
+          width: 80,
+          height: 80,
+          health: 8 + (prev.level - 1) * 2, // 8-12+ health scaling
+          maxHealth: 8 + (prev.level - 1) * 2,
+          type: 'boss',
+          points: 1000 + prev.level * 200,
+          pattern: 'shielded',
           lastShot: 0
         };
-        newEnemies.push(newEnemy);
+        newEnemies.push(boss);
+      }
+      // Check for mini-boss spawning (if no boss spawned)
+      else if (random < bossChance + miniBossChance) {
+        const miniBoss: Enemy = {
+          id: `miniboss-${Date.now()}`,
+          position: {
+            x: Math.random() * (config.canvas.width - 50),
+            y: -50
+          },
+          velocity: { x: 30, y: config.enemy.speed * 0.8 },
+          width: 50,
+          height: 50,
+          health: 3 + (prev.level - 1) * 2, // 3-5+ health scaling
+          maxHealth: 3 + (prev.level - 1) * 2,
+          type: 'mini-boss',
+          points: 300 + prev.level * 50,
+          pattern: 'zigzag',
+          lastShot: 0
+        };
+        newEnemies.push(miniBoss);
+      }
+      // Spawn normal enemies (reduced count if boss/mini-boss spawned)
+      else {
+        const enemiesPerSpawn = Math.min(2, Math.floor(prev.level / 2) + 1);
+        
+        for (let i = 0; i < enemiesPerSpawn; i++) {
+          const newEnemy: Enemy = {
+            id: `enemy-${Date.now()}-${i}`,
+            position: {
+              x: Math.random() * (config.canvas.width - 40),
+              y: -40 - (i * 50)
+            },
+            velocity: { x: 0, y: config.enemy.speed },
+            width: 30,
+            height: 30,
+            health: 1,
+            maxHealth: 1,
+            type: 'normal',
+            points: 100,
+            pattern: 'straight',
+            lastShot: 0
+          };
+          newEnemies.push(newEnemy);
+        }
       }
 
       return {
@@ -398,16 +453,47 @@ export const useGameState = () => {
         })
         .filter(powerUp => powerUp.position.y < config.canvas.height + 50);
 
-      // Update enemies with level-based speed
+      // Update enemies with level-based speed and movement patterns
       const enemySpeed = config.enemy.speed + (prev.level - 1) * 20;
       const updatedEnemies = prev.enemies
-        .map(enemy => ({
-          ...enemy,
-          position: {
-            x: enemy.position.x + enemy.velocity.x * deltaTime,
-            y: enemy.position.y + (enemy.velocity.y + enemySpeed - config.enemy.speed) * deltaTime
+        .map(enemy => {
+          let newVelocity = { ...enemy.velocity };
+          let newPosition = { ...enemy.position };
+          
+          // Apply movement patterns
+          switch (enemy.pattern) {
+            case 'zigzag':
+              // Mini-boss zigzag pattern
+              const zigzagTime = (performance.now() / 1000) % 4; // 4-second cycle
+              newVelocity.x = Math.sin(zigzagTime * Math.PI) * 80;
+              break;
+              
+            case 'shielded':
+              // Boss defensive movement - slower, side-to-side
+              const shieldTime = (performance.now() / 1500) % (Math.PI * 2);
+              newVelocity.x = Math.sin(shieldTime) * 60;
+              newVelocity.y = enemy.velocity.y * 0.7; // Slower descent
+              break;
+              
+            case 'straight':
+            default:
+              // Normal enemy movement - no change needed
+              break;
           }
-        }))
+          
+          // Update position with movement pattern
+          newPosition.x = enemy.position.x + newVelocity.x * deltaTime;
+          newPosition.y = enemy.position.y + (newVelocity.y + enemySpeed - config.enemy.speed) * deltaTime;
+          
+          // Keep enemies within bounds for horizontal movement
+          newPosition.x = Math.max(0, Math.min(config.canvas.width - enemy.width, newPosition.x));
+          
+          return {
+            ...enemy,
+            position: newPosition,
+            velocity: newVelocity
+          };
+        })
         .filter(enemy => 
           enemy.position.y < config.canvas.height + 50 && 
           enemy.health > 0
