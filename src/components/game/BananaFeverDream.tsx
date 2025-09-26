@@ -252,7 +252,7 @@ export const BananaFeverDream: React.FC = () => {
             </div>
 
             {/* Unified Bottom Area */}
-            <div className="w-[800px] mt-8 flex justify-between items-start">
+            <div className="w-[800px] mt-4 flex justify-between items-start">
               {/* Game Controls - left side */}
               <div className="flex gap-2">
                 <Button
