@@ -91,7 +91,7 @@ export const useGameState = () => {
     setGameState(prev => ({
       ...createInitialState(),
       status: 'ready',
-      secretMode: prev.secretMode
+      secretMode: false
     }));
   }, []);
 

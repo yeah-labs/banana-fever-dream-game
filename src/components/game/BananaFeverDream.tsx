@@ -170,7 +170,7 @@ export const BananaFeverDream: React.FC = () => {
                       Level {gameState.level} • Wave {gameState.wave}
                     </div>
                     {gameState.secretMode && (
-                      <div className="text-xs text-accent font-bold animate-pulse">
+                      <div className="text-xs text-blue-400 font-bold animate-pulse">
                         🎂 PPMAN MODE ACTIVE
                       </div>
                     )}
