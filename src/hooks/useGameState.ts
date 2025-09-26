@@ -226,7 +226,7 @@ export const useGameState = () => {
         type: selectedPowerUp.type,
         rarity: selectedPowerUp.rarity,
         duration: selectedPowerUp.type === 'shield' ? 5000 : 
-                  selectedPowerUp.type === 'score-doubler' ? 8000 :
+                  selectedPowerUp.type === 'score-doubler' ? 10000 :
                   selectedPowerUp.type === 'magnet' ? 10000 :
                   selectedPowerUp.type === 'sword' ? 10000 :
                   selectedPowerUp.type === 'reality-warp' ? 10000 : 5000,
