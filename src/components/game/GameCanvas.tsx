@@ -164,33 +164,47 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
         }
         ctx.closePath();
         ctx.fill();
-      } else if (powerUp.type === 'sword') {
-        // Sword shape (rectangle with triangle tip)
+      } else if (powerUp.type === 'score-doubler') {
+        // Draw "2X" text for score doubler
         const centerX = powerUp.position.x + powerUp.width / 2;
         const centerY = powerUp.position.y + powerUp.height / 2;
-        ctx.beginPath();
-        ctx.moveTo(centerX, powerUp.position.y);
-        ctx.lineTo(centerX - 3, powerUp.position.y + 6);
-        ctx.lineTo(centerX + 3, powerUp.position.y + 6);
-        ctx.lineTo(centerX + 2, powerUp.position.y + powerUp.height);
-        ctx.lineTo(centerX - 2, powerUp.position.y + powerUp.height);
-        ctx.closePath();
-        ctx.fill();
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Add white outline for visibility
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.strokeText('2X', centerX, centerY);
+        
+        // Fill with power-up color
+        ctx.fillStyle = rarityColors[powerUp.rarity];
+        ctx.fillText('2X', centerX, centerY);
+        
+        // Reset text properties
+        ctx.textAlign = 'start';
+        ctx.textBaseline = 'alphabetic';
+        ctx.lineWidth = 1;
       } else if (powerUp.type === 'magnet') {
-        // Stylized U-shape magnet with thicker stroke and rounded ends
+        // Two vertical lines for magnet poles
         const centerX = powerUp.position.x + powerUp.width / 2;
         const centerY = powerUp.position.y + powerUp.height / 2;
         ctx.strokeStyle = rarityColors[powerUp.rarity];
-        ctx.lineWidth = 7;
+        ctx.lineWidth = 3;
         ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        
+        // Left pole
         ctx.beginPath();
-        // Draw continuous U-shape with better proportions
-        ctx.moveTo(centerX - 6, centerY - 8);  // Top left
-        ctx.lineTo(centerX - 6, centerY + 2);  // Down left side
-        ctx.arc(centerX, centerY + 2, 6, Math.PI, 0);  // Bottom arc
-        ctx.lineTo(centerX + 6, centerY - 8);  // Up right side
+        ctx.moveTo(centerX - 4, centerY - 6);
+        ctx.lineTo(centerX - 4, centerY + 6);
         ctx.stroke();
+        
+        // Right pole
+        ctx.beginPath();
+        ctx.moveTo(centerX + 4, centerY - 6);
+        ctx.lineTo(centerX + 4, centerY + 6);
+        ctx.stroke();
+        
         // Reset line properties
         ctx.lineWidth = 1;
         ctx.lineCap = 'butt';
