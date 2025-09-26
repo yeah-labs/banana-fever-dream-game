@@ -208,6 +208,22 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
         // Reset line properties
         ctx.lineWidth = 1;
         ctx.lineCap = 'butt';
+      } else if (powerUp.type === 'sword') {
+        // Three horizontal rectangles for sword
+        const centerX = powerUp.position.x + powerUp.width / 2;
+        const centerY = powerUp.position.y + powerUp.height / 2;
+        const rectWidth = 4;
+        const rectHeight = 8;
+        const spacing = 6;
+        
+        ctx.fillStyle = rarityColors[powerUp.rarity];
+        
+        // Left sword
+        ctx.fillRect(centerX - spacing - rectWidth/2, centerY - rectHeight/2, rectWidth, rectHeight);
+        // Center sword
+        ctx.fillRect(centerX - rectWidth/2, centerY - rectHeight/2, rectWidth, rectHeight);
+        // Right sword
+        ctx.fillRect(centerX + spacing - rectWidth/2, centerY - rectHeight/2, rectWidth, rectHeight);
       } else {
         // Default: rectangle for other types
         ctx.fillRect(

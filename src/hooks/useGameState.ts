@@ -186,15 +186,15 @@ export const useGameState = () => {
     
     // Rarity-based weighted selection
     const powerUpPool = [
-      // Common (50% total)
-      { type: 'shield' as const, rarity: 'common' as const, weight: 50 },
-      // Uncommon (30%)
+      // Common (35% total)
+      { type: 'shield' as const, rarity: 'common' as const, weight: 35 },
+      // Uncommon (40%)
       { type: 'spread-shot' as const, rarity: 'uncommon' as const, weight: 20 },
-      { type: 'score-doubler' as const, rarity: 'uncommon' as const, weight: 10 },
+      { type: 'score-doubler' as const, rarity: 'uncommon' as const, weight: 20 },
       // Rare (15%)
       { type: 'magnet' as const, rarity: 'rare' as const, weight: 15 },
-      // Epic (4%)
-      { type: 'sword' as const, rarity: 'epic' as const, weight: 4 },
+      // Epic (9%)
+      { type: 'sword' as const, rarity: 'epic' as const, weight: 9 },
       // Legendary (1%)
       { type: 'reality-warp' as const, rarity: 'legendary' as const, weight: 1 }
     ];
@@ -251,12 +251,35 @@ export const useGameState = () => {
     setGameState(prev => {
       const newBullets: Bullet[] = [];
       
-      // Check for spread shot
+      // Check for power-ups
       const hasSpreadShot = activePowerUps.current.has('spread-shot');
       const hasSword = activePowerUps.current.has('sword');
       
-      if (hasSpreadShot) {
-        // Three bullet spread
+      if (hasSword) {
+        // Sword power-up: Always fire three horizontal sword bullets
+        for (let i = -1; i <= 1; i++) {
+          const newBullet: Bullet = {
+            id: `bullet-${Date.now()}-${i}`,
+            position: {
+              x: prev.player.position.x + prev.player.width / 2 - 3,
+              y: prev.player.position.y
+            },
+            velocity: { 
+              x: i * 50, // Horizontal spread
+              y: -config.player.bulletSpeed 
+            },
+            width: 6,
+            height: 12,
+            health: 1,
+            maxHealth: 1,
+            damage: 3,
+            isPlayerBullet: true,
+            type: 'sword'
+          };
+          newBullets.push(newBullet);
+        }
+      } else if (hasSpreadShot) {
+        // Spread shot power-up: Three normal bullets
         for (let i = -1; i <= 1; i++) {
           const newBullet: Bullet = {
             id: `bullet-${Date.now()}-${i}`,
@@ -272,14 +295,14 @@ export const useGameState = () => {
             height: 8,
             health: 1,
             maxHealth: 1,
-            damage: hasSword ? 3 : 1,
+            damage: 1,
             isPlayerBullet: true,
-            type: hasSword ? 'sword' : 'normal'
+            type: 'normal'
           };
           newBullets.push(newBullet);
         }
       } else {
-        // Single bullet
+        // Single normal bullet
         const newBullet: Bullet = {
           id: `bullet-${Date.now()}`,
           position: {
@@ -287,13 +310,13 @@ export const useGameState = () => {
             y: prev.player.position.y
           },
           velocity: { x: 0, y: -config.player.bulletSpeed },
-          width: hasSword ? 6 : 4,
-          height: hasSword ? 12 : 8,
+          width: 4,
+          height: 8,
           health: 1,
           maxHealth: 1,
-          damage: hasSword ? 3 : 1,
+          damage: 1,
           isPlayerBullet: true,
-          type: hasSword ? 'sword' : 'normal'
+          type: 'normal'
         };
         newBullets.push(newBullet);
       }
