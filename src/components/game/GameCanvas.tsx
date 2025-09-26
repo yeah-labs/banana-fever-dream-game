@@ -177,19 +177,23 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
         ctx.closePath();
         ctx.fill();
       } else if (powerUp.type === 'magnet') {
-        // Proper U-shape for magnet
+        // Stylized U-shape magnet with thicker stroke and rounded ends
         const centerX = powerUp.position.x + powerUp.width / 2;
         const centerY = powerUp.position.y + powerUp.height / 2;
         ctx.strokeStyle = rarityColors[powerUp.rarity];
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 7;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
         ctx.beginPath();
-        // Draw continuous U-shape
-        ctx.moveTo(centerX - 8, centerY - 6);  // Top left
-        ctx.lineTo(centerX - 8, centerY + 4);  // Down left side
-        ctx.arc(centerX, centerY + 4, 8, Math.PI, 0);  // Bottom arc
-        ctx.lineTo(centerX + 8, centerY - 6);  // Up right side
+        // Draw continuous U-shape with better proportions
+        ctx.moveTo(centerX - 6, centerY - 8);  // Top left
+        ctx.lineTo(centerX - 6, centerY + 2);  // Down left side
+        ctx.arc(centerX, centerY + 2, 6, Math.PI, 0);  // Bottom arc
+        ctx.lineTo(centerX + 6, centerY - 8);  // Up right side
         ctx.stroke();
+        // Reset line properties
         ctx.lineWidth = 1;
+        ctx.lineCap = 'butt';
       } else {
         // Default: rectangle for other types
         ctx.fillRect(
@@ -200,22 +204,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
         );
       }
 
-      // Add glow effect for rare items
-      if (powerUp.rarity !== 'common') {
-        ctx.shadowColor = rarityColors[powerUp.rarity];
-        ctx.shadowBlur = powerUp.rarity === 'legendary' ? 15 : 
-                        powerUp.rarity === 'epic' ? 12 : 8;
-        // Don't fill rect for magnet and spread-shot power-ups (they use custom shapes)
-        if (powerUp.type !== 'magnet' && powerUp.type !== 'spread-shot') {
-          ctx.fillRect(
-            powerUp.position.x - 2,
-            powerUp.position.y - 2,
-            powerUp.width + 4,
-            powerUp.height + 4
-          );
-        }
-        ctx.shadowBlur = 0;
-      }
     });
 
     // Reset transform for shake effect
