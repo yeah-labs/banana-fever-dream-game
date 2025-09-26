@@ -202,12 +202,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
         ctx.shadowColor = rarityColors[powerUp.rarity];
         ctx.shadowBlur = powerUp.rarity === 'legendary' ? 15 : 
                         powerUp.rarity === 'epic' ? 12 : 8;
-        ctx.fillRect(
-          powerUp.position.x - 2,
-          powerUp.position.y - 2,
-          powerUp.width + 4,
-          powerUp.height + 4
-        );
+        // Don't fill rect for magnet power-ups (they use stroke only)
+        if (powerUp.type !== 'magnet') {
+          ctx.fillRect(
+            powerUp.position.x - 2,
+            powerUp.position.y - 2,
+            powerUp.width + 4,
+            powerUp.height + 4
+          );
+        }
         ctx.shadowBlur = 0;
       }
     });

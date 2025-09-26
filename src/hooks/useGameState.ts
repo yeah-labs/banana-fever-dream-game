@@ -186,13 +186,13 @@ export const useGameState = () => {
     
     // Rarity-based weighted selection
     const powerUpPool = [
-      // Common (60% total)
-      { type: 'spread-shot' as const, rarity: 'common' as const, weight: 30 },
-      { type: 'shield' as const, rarity: 'common' as const, weight: 30 },
-      // Uncommon (25%)
-      { type: 'score-doubler' as const, rarity: 'uncommon' as const, weight: 25 },
-      // Rare (10%)
-      { type: 'magnet' as const, rarity: 'rare' as const, weight: 10 },
+      // Common (50% total)
+      { type: 'shield' as const, rarity: 'common' as const, weight: 50 },
+      // Uncommon (30%)
+      { type: 'spread-shot' as const, rarity: 'uncommon' as const, weight: 20 },
+      { type: 'score-doubler' as const, rarity: 'uncommon' as const, weight: 10 },
+      // Rare (15%)
+      { type: 'magnet' as const, rarity: 'rare' as const, weight: 15 },
       // Epic (4%)
       { type: 'sword' as const, rarity: 'epic' as const, weight: 4 },
       // Legendary (1%)
