@@ -5,7 +5,7 @@ const DEFAULT_CONFIG: GameConfig = {
   canvas: { width: 800, height: 600 },
   player: { speed: 300, bulletSpeed: 400, fireRate: 200, maxHealth: 3 },
   enemy: { speed: 50, bulletSpeed: 200, spawnRate: 800 },
-  powerUp: { dropRate: 0.15, magnetRadius: 150 },
+  powerUp: { dropRate: 0.15, magnetRadius: 250 },
   fever: { 
     buildRate: 1, 
     damageMultiplier: { normal: 1, miniBoss: 0.5, boss: 0.25 } 

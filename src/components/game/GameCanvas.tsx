@@ -125,11 +125,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
     // Draw power-ups
     gameState.powerUps.forEach(powerUp => {
       const rarityColors = {
-        common: 'hsl(120, 40%, 50%)',
-        uncommon: 'hsl(200, 60%, 50%)',
-        rare: 'hsl(280, 70%, 60%)',
-        epic: 'hsl(45, 80%, 55%)',
-        legendary: 'hsl(330, 90%, 70%)'
+        common: 'hsl(0, 0%, 60%)',       // Gray
+        uncommon: 'hsl(120, 60%, 50%)',  // Green
+        rare: 'hsl(220, 70%, 60%)',      // Blue
+        epic: 'hsl(280, 70%, 60%)',      // Purple
+        legendary: 'hsl(45, 80%, 55%)'   // Gold
       };
 
       ctx.fillStyle = rarityColors[powerUp.rarity];
@@ -178,12 +178,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
         ctx.fill();
       } else if (powerUp.type === 'magnet') {
         // U-shape for magnet
-        ctx.beginPath();
-        ctx.arc(powerUp.position.x + 4, powerUp.position.y + powerUp.height / 2, 4, Math.PI, 0);
-        ctx.arc(powerUp.position.x + powerUp.width - 4, powerUp.position.y + powerUp.height / 2, 4, Math.PI, 0);
-        ctx.stroke();
-        ctx.lineWidth = 3;
+        const centerX = powerUp.position.x + powerUp.width / 2;
+        const centerY = powerUp.position.y + powerUp.height / 2;
         ctx.strokeStyle = rarityColors[powerUp.rarity];
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(centerX - 6, centerY, 6, Math.PI, 0);
+        ctx.arc(centerX + 6, centerY, 6, Math.PI, 0);
         ctx.stroke();
         ctx.lineWidth = 1;
       } else {
