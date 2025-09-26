@@ -1,5 +1,6 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { GameState, GameConfig } from '@/types/game';
+import playerMonkeyImage from '@/assets/player-monkey.png';
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -8,6 +9,14 @@ interface GameCanvasProps {
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [playerImage, setPlayerImage] = useState<HTMLImageElement | null>(null);
+
+  // Load player image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setPlayerImage(img);
+    img.src = playerMonkeyImage;
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,27 +37,24 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
     }
 
     // Draw player
-    if (gameState.player) {
-      ctx.fillStyle = gameState.player.invulnerable ? 
-        'hsla(45, 100%, 50%, 0.5)' : 'hsl(45, 100%, 50%)';
+    if (gameState.player && playerImage) {
+      // Apply invulnerability effect
+      if (gameState.player.invulnerable) {
+        ctx.globalAlpha = 0.5;
+      }
       
-      // Simple banana-like shape
-      ctx.beginPath();
-      ctx.arc(
-        gameState.player.position.x + gameState.player.width / 2,
-        gameState.player.position.y + gameState.player.height / 2,
-        gameState.player.width / 2,
-        0,
-        Math.PI * 2
+      // Draw player image
+      ctx.drawImage(
+        playerImage,
+        gameState.player.position.x,
+        gameState.player.position.y,
+        gameState.player.width,
+        gameState.player.height
       );
-      ctx.fill();
 
-      // Add banana glow effect
-      if (!gameState.player.invulnerable) {
-        ctx.shadowColor = 'hsl(45, 100%, 50%)';
-        ctx.shadowBlur = 10;
-        ctx.fill();
-        ctx.shadowBlur = 0;
+      // Reset alpha
+      if (gameState.player.invulnerable) {
+        ctx.globalAlpha = 1;
       }
     }
 
