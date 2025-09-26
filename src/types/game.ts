@@ -34,6 +34,7 @@ export interface Enemy extends GameObject {
   hoverStartTime?: number;
   isHovering?: boolean;
   damageWhenStartedHovering?: number;
+  hoverThreshold?: number;
 }
 
 export interface Bullet extends GameObject {

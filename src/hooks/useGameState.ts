@@ -334,12 +334,13 @@ export const useGameState = () => {
           velocity: { x: 50, y: config.enemy.speed * 0.6 }, // Slower but stronger
           width: 80,
           height: 80,
-          health: 8 + (prev.level - 1) * 2, // 8-12+ health scaling
-          maxHealth: 8 + (prev.level - 1) * 2,
+          health: 8 + (prev.level - 1) * 1, // 8+ health scaling (+1 per level)
+          maxHealth: 8 + (prev.level - 1) * 1,
           type: 'boss',
           points: 1000 + prev.level * 200,
           pattern: 'shielded',
-          lastShot: 0
+          lastShot: 0,
+          hoverThreshold: 0.2 + Math.random() * 0.1 // Random between 20-30%
         };
         newEnemies.push(boss);
       }
@@ -354,12 +355,13 @@ export const useGameState = () => {
           velocity: { x: 30, y: config.enemy.speed * 0.8 },
           width: 50,
           height: 50,
-          health: 3 + (prev.level - 1) * 2, // 3-5+ health scaling
-          maxHealth: 3 + (prev.level - 1) * 2,
+          health: 3 + (prev.level - 1) * 1, // 3+ health scaling (+1 per level)
+          maxHealth: 3 + (prev.level - 1) * 1,
           type: 'mini-boss',
           points: 300 + prev.level * 50,
           pattern: 'zigzag',
-          lastShot: 0
+          lastShot: 0,
+          hoverThreshold: 0.2 + Math.random() * 0.1 // Random between 20-30%
         };
         newEnemies.push(miniBoss);
       }
@@ -462,10 +464,8 @@ export const useGameState = () => {
           let updatedEnemy = { ...enemy };
           
           // Check for hover zone entry (bosses and mini-bosses)
-          if ((enemy.type === 'mini-boss' || enemy.type === 'boss') && !enemy.isHovering) {
-            const hoverThreshold = enemy.type === 'mini-boss' ? 
-              config.canvas.height * 0.25 : // Mini-boss stops at 25% down
-              config.canvas.height * 0.20;   // Boss stops at 20% down
+          if ((enemy.type === 'mini-boss' || enemy.type === 'boss') && !enemy.isHovering && enemy.hoverThreshold) {
+            const hoverThreshold = config.canvas.height * enemy.hoverThreshold; // Use randomized threshold
               
             if (enemy.position.y >= hoverThreshold) {
               updatedEnemy.isHovering = true;
