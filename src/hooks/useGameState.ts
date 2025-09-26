@@ -459,20 +459,55 @@ export const useGameState = () => {
         .map(enemy => {
           let newVelocity = { ...enemy.velocity };
           let newPosition = { ...enemy.position };
+          let updatedEnemy = { ...enemy };
           
-          // Apply movement patterns
+          // Check for hover zone entry (bosses and mini-bosses)
+          if ((enemy.type === 'mini-boss' || enemy.type === 'boss') && !enemy.isHovering) {
+            const hoverThreshold = enemy.type === 'mini-boss' ? 
+              config.canvas.height * 0.25 : // Mini-boss stops at 25% down
+              config.canvas.height * 0.20;   // Boss stops at 20% down
+              
+            if (enemy.position.y >= hoverThreshold) {
+              updatedEnemy.isHovering = true;
+              updatedEnemy.hoverStartTime = currentTime;
+              updatedEnemy.damageWhenStartedHovering = enemy.health;
+            }
+          }
+          
+          // Apply movement patterns with hover logic
           switch (enemy.pattern) {
             case 'zigzag':
               // Mini-boss zigzag pattern
-              const zigzagTime = (performance.now() / 1000) % 4; // 4-second cycle
+              const zigzagTime = (currentTime / 1000) % 4; // 4-second cycle
               newVelocity.x = Math.sin(zigzagTime * Math.PI) * 80;
+              
+              // Hover behavior: stop Y movement for 3-4 seconds, then slow descent
+              if (updatedEnemy.isHovering) {
+                const hoverDuration = currentTime - (updatedEnemy.hoverStartTime || 0);
+                if (hoverDuration < 3500) { // Hover for 3.5 seconds
+                  newVelocity.y = 0;
+                } else {
+                  newVelocity.y = enemy.velocity.y * 0.3; // Very slow descent after hovering
+                }
+              }
               break;
               
             case 'shielded':
               // Boss defensive movement - slower, side-to-side
-              const shieldTime = (performance.now() / 1500) % (Math.PI * 2);
+              const shieldTime = (currentTime / 1500) % (Math.PI * 2);
               newVelocity.x = Math.sin(shieldTime) * 60;
-              newVelocity.y = enemy.velocity.y * 0.7; // Slower descent
+              
+              // Hover behavior: stop until 50% damage taken, then crawl down
+              if (updatedEnemy.isHovering) {
+                const damagePercentage = (updatedEnemy.damageWhenStartedHovering! - enemy.health) / updatedEnemy.damageWhenStartedHovering!;
+                if (damagePercentage < 0.5) {
+                  newVelocity.y = 0; // Stop until 50% damage
+                } else {
+                  newVelocity.y = enemy.velocity.y * 0.2; // Crawl down after damage
+                }
+              } else {
+                newVelocity.y = enemy.velocity.y * 0.7; // Slower descent before hovering
+              }
               break;
               
             case 'straight':
@@ -483,13 +518,19 @@ export const useGameState = () => {
           
           // Update position with movement pattern
           newPosition.x = enemy.position.x + newVelocity.x * deltaTime;
-          newPosition.y = enemy.position.y + (newVelocity.y + enemySpeed - config.enemy.speed) * deltaTime;
+          
+          // Y movement calculation based on hover state
+          let yMovement = newVelocity.y;
+          if (!updatedEnemy.isHovering) {
+            yMovement += enemySpeed - config.enemy.speed;
+          }
+          newPosition.y = enemy.position.y + yMovement * deltaTime;
           
           // Keep enemies within bounds for horizontal movement
           newPosition.x = Math.max(0, Math.min(config.canvas.width - enemy.width, newPosition.x));
           
           return {
-            ...enemy,
+            ...updatedEnemy,
             position: newPosition,
             velocity: newVelocity
           };

@@ -31,6 +31,9 @@ export interface Enemy extends GameObject {
   points: number;
   pattern: 'zigzag' | 'straight' | 'shielded' | 'splitter';
   lastShot: number;
+  hoverStartTime?: number;
+  isHovering?: boolean;
+  damageWhenStartedHovering?: number;
 }
 
 export interface Bullet extends GameObject {
