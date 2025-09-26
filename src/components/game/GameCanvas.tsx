@@ -29,11 +29,28 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
     ctx.fillStyle = 'hsl(230, 15%, 8%)';
     ctx.fillRect(0, 0, config.canvas.width, config.canvas.height);
 
-    // Apply screen shake
-    if (gameState.shakeIntensity > 0) {
-      const shakeX = (Math.random() - 0.5) * gameState.shakeIntensity;
-      const shakeY = (Math.random() - 0.5) * gameState.shakeIntensity;
+    // Apply screen shake with Reality Storm intensity multiplier
+    let effectiveShake = gameState.shakeIntensity;
+    if (gameState.realityStormActive) {
+      effectiveShake *= 3; // Triple shake intensity during Reality Storm
+    }
+    
+    if (effectiveShake > 0) {
+      const shakeX = (Math.random() - 0.5) * effectiveShake;
+      const shakeY = (Math.random() - 0.5) * effectiveShake;
       ctx.translate(shakeX, shakeY);
+    }
+
+    // Reality Storm visual effects
+    if (gameState.realityStormActive) {
+      // Color inversion effect (randomly flicker every few frames)
+      if (Math.random() < 0.1) {
+        ctx.filter = 'invert(1) hue-rotate(180deg)';
+      }
+      
+      // Screen warping effect
+      const warpScale = 1 + (Math.sin(Date.now() * 0.01) * 0.05);
+      ctx.scale(warpScale, warpScale);
     }
 
     // Draw player
@@ -253,9 +270,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
 
     });
 
-    // Reset transform for shake effect
-    if (gameState.shakeIntensity > 0) {
+    // Reset all transforms and filters
+    if (effectiveShake > 0 || gameState.realityStormActive) {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.filter = 'none';
     }
 
   }, [gameState, config]);

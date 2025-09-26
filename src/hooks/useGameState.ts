@@ -42,7 +42,10 @@ const createInitialState = (): GameState => ({
   secretMode: false,
   shakeIntensity: 0,
   lastFrame: 0,
-  feversUsed: 0
+  feversUsed: 0,
+  realityStormActive: false,
+  realityStormEndTime: 0,
+  realityStormIntensity: 0
 });
 
 export const useGameState = () => {
@@ -476,6 +479,15 @@ export const useGameState = () => {
         })
         .filter(powerUp => powerUp.position.y < config.canvas.height + 50);
 
+      // Check for Reality Storm effects  
+      const isRealityStormActive = prev.realityStormActive && currentTime < prev.realityStormEndTime;
+      
+      // Apply Reality Storm chaos to enemy behavior
+      let chaosMultiplier = 1;
+      if (isRealityStormActive) {
+        chaosMultiplier = 0.3 + Math.random() * 0.4; // Random between 0.3-0.7
+      }
+
       // Update enemies with level-based speed and movement patterns
       const enemySpeed = config.enemy.speed + (prev.level - 1) * 20;
       const updatedEnemies = prev.enemies
@@ -483,6 +495,19 @@ export const useGameState = () => {
           let newVelocity = { ...enemy.velocity };
           let newPosition = { ...enemy.position };
           let updatedEnemy = { ...enemy };
+          
+          // Apply Reality Storm chaos effects
+          if (isRealityStormActive) {
+            // Random direction changes every frame during Reality Storm
+            const randomAngle = Math.random() * Math.PI * 2;
+            const randomSpeed = (config.enemy.speed * 0.5) + (Math.random() * config.enemy.speed);
+            newVelocity.x = Math.cos(randomAngle) * randomSpeed * chaosMultiplier;
+            newVelocity.y = Math.abs(Math.sin(randomAngle)) * randomSpeed * chaosMultiplier; // Keep downward motion
+            
+            // Random size fluctuation (visual effect handled in canvas)
+            updatedEnemy.width = enemy.width * (0.8 + Math.random() * 0.6);
+            updatedEnemy.height = enemy.height * (0.8 + Math.random() * 0.6);
+          }
           
           // Check for hover zone entry (bosses and mini-bosses)
           if ((enemy.type === 'mini-boss' || enemy.type === 'boss') && !enemy.isHovering && enemy.hoverThreshold) {
@@ -574,7 +599,14 @@ export const useGameState = () => {
           if (powerUp.type === 'shield') {
             // Shield effect handled in damage calculation
           } else if (powerUp.type === 'reality-warp') {
-            // Special reality warp effects can be added here
+            // Activate Reality Storm for 10 seconds
+            setGameState(currentState => ({
+              ...currentState,
+              realityStormActive: true,
+              realityStormEndTime: currentTime + 10000,
+              realityStormIntensity: 1.0,
+              shakeIntensity: Math.max(currentState.shakeIntensity, 20)
+            }));
           }
         } else {
           remainingPowerUps.push(powerUp);
@@ -658,17 +690,36 @@ export const useGameState = () => {
         newPlayer.invulnerabilityTime = 2000; // 2 seconds of invulnerability
       }
 
+      // Check if Reality Storm has ended and award survival bonus
+      let stormEndBonus = 0;
+      let stormActive = prev.realityStormActive;
+      let stormIntensity = prev.realityStormIntensity;
+      
+      if (prev.realityStormActive && currentTime >= prev.realityStormEndTime) {
+        // Reality Storm ended - player survived!
+        stormActive = false;
+        stormIntensity = 0;
+        if (newPlayer.health > 0) {
+          stormEndBonus = 25000; // Massive survival bonus
+        }
+      }
+
       return {
         ...prev,
         bullets: remainingBullets,
         enemies: remainingEnemies,
         powerUps: remainingPowerUps,
-        player: newPlayer,
+        player: {
+          ...newPlayer,
+          score: newPlayer.score + stormEndBonus
+        },
         wave: newWave,
         level: newLevel,
         totalWaves: newTotalWaves,
         waveProgress: waveProgress >= totalEnemiesInWave ? 0 : waveProgress,
-        shakeIntensity: playerDamaged ? 15 : prev.shakeIntensity
+        shakeIntensity: playerDamaged ? 15 : (isRealityStormActive ? 25 : prev.shakeIntensity),
+        realityStormActive: stormActive,
+        realityStormIntensity: stormIntensity
       };
     });
   }, [config, checkCollision]);

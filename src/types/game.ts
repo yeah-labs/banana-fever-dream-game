@@ -66,6 +66,9 @@ export interface GameState {
   shakeIntensity: number;
   lastFrame: number;
   feversUsed: number;
+  realityStormActive: boolean;
+  realityStormEndTime: number;
+  realityStormIntensity: number;
 }
 
 export interface GameConfig {
