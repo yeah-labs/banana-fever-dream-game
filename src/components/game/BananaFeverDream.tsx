@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { GameCanvas } from './GameCanvas';
-import { GameUI } from './GameUI';
 
 import { GameOver } from './GameOver';
 import { Button } from '@/components/ui/button';
