@@ -224,6 +224,23 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
         ctx.fillRect(centerX - rectWidth/2, centerY - rectHeight/2, rectWidth, rectHeight);
         // Right sword
         ctx.fillRect(centerX + spacing - rectWidth/2, centerY - rectHeight/2, rectWidth, rectHeight);
+      } else if (powerUp.type === 'reality-warp') {
+        // Tilted pill shape for reality warp
+        const centerX = powerUp.position.x + powerUp.width / 2;
+        const centerY = powerUp.position.y + powerUp.height / 2;
+        const pillWidth = powerUp.width * 1.2;
+        const pillHeight = powerUp.height * 0.7;
+        
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(Math.PI / 4); // 45 degrees
+        
+        // Draw pill (rounded rectangle)
+        ctx.beginPath();
+        ctx.roundRect(-pillWidth/2, -pillHeight/2, pillWidth, pillHeight, pillHeight/2);
+        ctx.fill();
+        
+        ctx.restore();
       } else {
         // Default: rectangle for other types
         ctx.fillRect(
