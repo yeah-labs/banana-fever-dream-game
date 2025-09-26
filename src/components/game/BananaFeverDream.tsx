@@ -8,16 +8,6 @@ import { toast } from 'sonner';
 
 export const BananaFeverDream: React.FC = () => {
   const { gameState, config, startGame, resetToReady, pauseGame, gameOver, activateFever } = useGameState();
-  const [highScore, setHighScore] = useState(0);
-  const [isNewHighScore, setIsNewHighScore] = useState(false);
-
-  // Load high score from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('banana-fever-high-score');
-    if (saved) {
-      setHighScore(parseInt(saved, 10));
-    }
-  }, []);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -71,30 +61,12 @@ export const BananaFeverDream: React.FC = () => {
   // Check for game over conditions
   useEffect(() => {
     if (gameState.status === 'playing' && gameState.player.health <= 0) {
-      // Check if it's a new high score
-      const currentScore = gameState.player.score;
-      if (currentScore > highScore) {
-        setHighScore(currentScore);
-        setIsNewHighScore(true);
-        localStorage.setItem('banana-fever-high-score', currentScore.toString());
-        toast.success('🎉 NEW HIGH SCORE!', {
-          duration: 5000,
-          style: { 
-            background: 'hsl(45, 100%, 50%)', 
-            color: 'hsl(230, 15%, 8%)',
-            fontWeight: 'bold'
-          }
-        });
-      } else {
-        setIsNewHighScore(false);
-      }
-      
       gameOver();
       toast.error('Game Over! The Pith have won...', {
         duration: 3000
       });
     }
-  }, [gameState.status, gameState.player.health, gameState.player.score, highScore, gameOver]);
+  }, [gameState.status, gameState.player.health, gameOver]);
 
   // Secret mode activation toast
   useEffect(() => {
@@ -123,7 +95,6 @@ export const BananaFeverDream: React.FC = () => {
 
   const handleResetToReady = () => {
     resetToReady();
-    setIsNewHighScore(false);
     toast.success('Game reset - Ready to play!', {
       duration: 2000,
       style: { 
@@ -135,7 +106,6 @@ export const BananaFeverDream: React.FC = () => {
 
   const handleMainMenu = () => {
     // Reset to ready state instead of reloading
-    setIsNewHighScore(false);
     window.location.reload();
   };
 
@@ -147,7 +117,6 @@ export const BananaFeverDream: React.FC = () => {
             gameState={gameState}
             onRestart={handleResetToReady}
             onMainMenu={handleMainMenu}
-            isNewHighScore={isNewHighScore}
           />
         );
       
@@ -264,7 +233,6 @@ export const BananaFeverDream: React.FC = () => {
                   {gameState.status === 'ready' ? 'START GAME' : 'END GAME'}
                 </Button>
                 <Button
-                  onClick={() => toast.info('Leaderboard coming soon!')}
                   variant="outline"
                   size="lg"
                   className="border-primary hover:bg-primary/10"

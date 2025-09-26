@@ -8,40 +8,16 @@ interface GameOverProps {
   gameState: GameState;
   onRestart: () => void;
   onMainMenu: () => void;
-  isNewHighScore: boolean;
 }
 
 export const GameOver: React.FC<GameOverProps> = ({ 
   gameState, 
   onRestart, 
-  onMainMenu,
-  isNewHighScore
+  onMainMenu
 }) => {
-  const [playerName, setPlayerName] = useState('');
-  const [showNameInput, setShowNameInput] = useState(isNewHighScore);
-
   const { player, level, wave, gameTime } = gameState;
   const timeMinutes = Math.floor(gameTime / 60);
   const timeSeconds = Math.floor(gameTime % 60);
-
-  const handleSaveScore = () => {
-    // TODO: Save to localStorage or backend
-    console.log('Saving score:', { 
-      score: player.score, 
-      level, 
-      waves: wave,
-      playerName: playerName || 'Anonymous',
-      timestamp: Date.now() 
-    });
-    setShowNameInput(false);
-  };
-
-  useEffect(() => {
-    if (isNewHighScore) {
-      // Add confetti or celebration animation
-      console.log('New high score achieved!');
-    }
-  }, [isNewHighScore]);
 
   return (
     <div className="min-h-screen bg-gradient-game flex items-center justify-center p-4">
@@ -51,11 +27,6 @@ export const GameOver: React.FC<GameOverProps> = ({
           <h1 className="text-5xl font-bold text-destructive animate-pulse">
             THE DREAM IS OVER
           </h1>
-          {isNewHighScore && (
-            <div className="text-2xl font-bold text-primary animate-bounce">
-              🎉 NEW HIGH SCORE! 🎉
-            </div>
-          )}
           <p className="text-lg text-muted-foreground">
             The Pith have overtaken the swamp... for now.
           </p>
@@ -102,35 +73,6 @@ export const GameOver: React.FC<GameOverProps> = ({
               </div>
             </div>
 
-            {/* Name Input for High Score */}
-            {showNameInput && (
-              <div className="pt-4 border-t border-border space-y-3">
-                <div className="text-center">
-                  <h4 className="font-semibold text-primary mb-2">
-                    Enter your name for the leaderboard:
-                  </h4>
-                  <div className="flex gap-2 max-w-sm mx-auto">
-                    <Input
-                      value={playerName}
-                      onChange={(e) => setPlayerName(e.target.value)}
-                      placeholder="Your name"
-                      maxLength={20}
-                      className="text-center"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveScore();
-                      }}
-                    />
-                    <Button 
-                      onClick={handleSaveScore}
-                      variant="outline"
-                      className="whitespace-nowrap"
-                    >
-                      Save
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
 
@@ -145,7 +87,6 @@ export const GameOver: React.FC<GameOverProps> = ({
             PLAY AGAIN
           </Button>
           <Button
-            onClick={() => {}} 
             variant="outline"
             size="lg"
             className="border-primary hover:bg-primary/10"
