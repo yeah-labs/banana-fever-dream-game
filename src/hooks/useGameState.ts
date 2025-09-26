@@ -228,7 +228,7 @@ export const useGameState = () => {
         duration: selectedPowerUp.type === 'shield' ? 5000 : 
                   selectedPowerUp.type === 'score-doubler' ? 8000 :
                   selectedPowerUp.type === 'magnet' ? 10000 :
-                  selectedPowerUp.type === 'sword' ? 5000 :
+                  selectedPowerUp.type === 'sword' ? 10000 :
                   selectedPowerUp.type === 'reality-warp' ? 10000 : 5000,
         effect: {}
       };
@@ -256,28 +256,26 @@ export const useGameState = () => {
       const hasSword = activePowerUps.current.has('sword');
       
       if (hasSword) {
-        // Sword power-up: Always fire three horizontal sword bullets
-        for (let i = -1; i <= 1; i++) {
-          const newBullet: Bullet = {
-            id: `bullet-${Date.now()}-${i}`,
-            position: {
-              x: prev.player.position.x + prev.player.width / 2 - 3,
-              y: prev.player.position.y
-            },
-            velocity: { 
-              x: i * 50, // Horizontal spread
-              y: -config.player.bulletSpeed 
-            },
-            width: 6,
-            height: 12,
-            health: 1,
-            maxHealth: 1,
-            damage: 3,
-            isPlayerBullet: true,
-            type: 'sword'
-          };
-          newBullets.push(newBullet);
-        }
+        // Sword power-up: Single powerful sword bullet
+        const newBullet: Bullet = {
+          id: `bullet-${Date.now()}`,
+          position: {
+            x: prev.player.position.x + prev.player.width / 2 - 3,
+            y: prev.player.position.y
+          },
+          velocity: { 
+            x: 0, // Straight shot
+            y: -config.player.bulletSpeed 
+          },
+          width: 6,
+          height: 12,
+          health: 1,
+          maxHealth: 1,
+          damage: 5, // 5x normal bullet damage
+          isPlayerBullet: true,
+          type: 'sword'
+        };
+        newBullets.push(newBullet);
       } else if (hasSpreadShot) {
         // Spread shot power-up: Three normal bullets
         for (let i = -1; i <= 1; i++) {
