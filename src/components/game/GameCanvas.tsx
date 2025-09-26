@@ -165,26 +165,20 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
         ctx.closePath();
         ctx.fill();
       } else if (powerUp.type === 'score-doubler') {
-        // Draw "2X" text for score doubler
+        // Draw "X" text for score doubler
         const centerX = powerUp.position.x + powerUp.width / 2;
         const centerY = powerUp.position.y + powerUp.height / 2;
-        ctx.font = 'bold 10px Arial';
+        ctx.font = 'bold 20px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // Add white outline for visibility
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 2;
-        ctx.strokeText('2X', centerX, centerY);
-        
         // Fill with power-up color
         ctx.fillStyle = rarityColors[powerUp.rarity];
-        ctx.fillText('2X', centerX, centerY);
+        ctx.fillText('X', centerX, centerY);
         
         // Reset text properties
         ctx.textAlign = 'start';
         ctx.textBaseline = 'alphabetic';
-        ctx.lineWidth = 1;
       } else if (powerUp.type === 'magnet') {
         // Two vertical lines for magnet poles
         const centerX = powerUp.position.x + powerUp.width / 2;
