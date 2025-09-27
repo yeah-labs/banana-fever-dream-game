@@ -59,6 +59,32 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- ThirdWeb (Web3 wallet integration)
+
+## ThirdWeb Integration
+
+This project includes ThirdWeb integration for Web3 wallet connections with social login support.
+
+### Setup
+
+1. Get your ThirdWeb Client ID from [ThirdWeb Dashboard](https://thirdweb.com/dashboard)
+2. Create a `.env` file in the root directory:
+   ```
+   VITE_THIRDWEB_CLIENT_ID=your-thirdweb-client-id-here
+   ```
+3. The app will automatically use the client ID for wallet connections
+
+### Features
+
+- **Social Login**: Connect with Google/Gmail accounts
+- **Wallet Display**: Shows connected wallet address in the header
+- **Multiple Wallet Support**: Supports various Web3 wallets
+- **Disconnect Functionality**: Easy wallet disconnection
+
+### Components
+
+- `Header.tsx`: Main header component with wallet connection UI
+- ThirdWeb Provider: Wraps the entire app for wallet functionality
 
 ## How can I deploy this project?
 
