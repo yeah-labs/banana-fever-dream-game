@@ -496,17 +496,22 @@ export const useGameState = () => {
           let newPosition = { ...enemy.position };
           let updatedEnemy = { ...enemy };
           
-          // Apply Reality Storm chaos effects
+          // Apply Reality Storm chaos effects (reduced intensity)
           if (isRealityStormActive) {
-            // Random direction changes every frame during Reality Storm
-            const randomAngle = Math.random() * Math.PI * 2;
-            const randomSpeed = (config.enemy.speed * 0.5) + (Math.random() * config.enemy.speed);
-            newVelocity.x = Math.cos(randomAngle) * randomSpeed * chaosMultiplier;
-            newVelocity.y = Math.abs(Math.sin(randomAngle)) * randomSpeed * chaosMultiplier; // Keep downward motion
+            // Random direction changes every 1-2 seconds instead of every frame
+            if (Math.random() < 0.01) { // ~1% chance per frame = every 1-2 seconds at 60fps
+              // Preserve some downward motion (50% bias toward player)
+              const randomAngle = Math.random() * Math.PI * 2;
+              const randomSpeed = (config.enemy.speed * 0.8) + (Math.random() * config.enemy.speed * 0.4); // 0.8x to 1.2x speed
+              newVelocity.x = Math.cos(randomAngle) * randomSpeed * chaosMultiplier;
+              newVelocity.y = Math.max(0, Math.abs(Math.sin(randomAngle)) * randomSpeed * chaosMultiplier * 0.8); // Bias downward
+            }
             
-            // Random size fluctuation (visual effect handled in canvas)
-            updatedEnemy.width = enemy.width * (0.8 + Math.random() * 0.6);
-            updatedEnemy.height = enemy.height * (0.8 + Math.random() * 0.6);
+            // Subtle size fluctuation (0.9x to 1.1x instead of 0.8x to 1.4x)
+            if (Math.random() < 0.002) { // Very occasional size changes
+              updatedEnemy.width = enemy.width * (0.9 + Math.random() * 0.2);
+              updatedEnemy.height = enemy.height * (0.9 + Math.random() * 0.2);
+            }
           }
           
           // Check for hover zone entry (bosses and mini-bosses)

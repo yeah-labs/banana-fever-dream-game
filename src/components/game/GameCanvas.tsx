@@ -29,10 +29,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
     ctx.fillStyle = 'hsl(230, 15%, 8%)';
     ctx.fillRect(0, 0, config.canvas.width, config.canvas.height);
 
-    // Apply screen shake with Reality Storm intensity multiplier
+    // Apply screen shake with reduced Reality Storm intensity multiplier
     let effectiveShake = gameState.shakeIntensity;
     if (gameState.realityStormActive) {
-      effectiveShake *= 3; // Triple shake intensity during Reality Storm
+      effectiveShake *= 1.5; // Reduced from 3x to 1.5x shake intensity
     }
     
     if (effectiveShake > 0) {
@@ -41,15 +41,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
       ctx.translate(shakeX, shakeY);
     }
 
-    // Reality Storm visual effects
+    // Reality Storm visual effects (reduced intensity)
     if (gameState.realityStormActive) {
-      // Color inversion effect (randomly flicker every few frames)
-      if (Math.random() < 0.1) {
+      // Rare color inversion effect (2% chance instead of 10%)
+      if (Math.random() < 0.02) {
         ctx.filter = 'invert(1) hue-rotate(180deg)';
       }
       
-      // Screen warping effect
-      const warpScale = 1 + (Math.sin(Date.now() * 0.01) * 0.05);
+      // Subtle screen warping effect (2% instead of 5%)
+      const warpScale = 1 + (Math.sin(Date.now() * 0.01) * 0.02);
       ctx.scale(warpScale, warpScale);
     }
 
