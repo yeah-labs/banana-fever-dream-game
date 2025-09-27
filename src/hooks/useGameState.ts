@@ -468,16 +468,16 @@ export const useGameState = () => {
             const distance = Math.sqrt(dx * dx + dy * dy);
             
             if (distance < config.powerUp.magnetRadius && distance > 0) {
-              const magnetStrength = 400; // Increased from 200 to 400
+              const magnetStrength = 800; // Increased for faster pull
               const pullX = (dx / distance) * magnetStrength;
               const pullY = (dy / distance) * magnetStrength;
               
               // Add velocity damping when within magnet range to prevent fly-by
-              newVelocity.x = newVelocity.x * 0.7 + pullX;
-              newVelocity.y = newVelocity.y * 0.7 + pullY;
+              newVelocity.x = newVelocity.x * 0.8 + pullX;
+              newVelocity.y = newVelocity.y * 0.8 + pullY;
               
               // Cap maximum magnet velocity to prevent overshooting
-              const maxMagnetVelocity = 300;
+              const maxMagnetVelocity = 600;
               const currentSpeed = Math.sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
               if (currentSpeed > maxMagnetVelocity) {
                 newVelocity.x = (newVelocity.x / currentSpeed) * maxMagnetVelocity;
