@@ -224,7 +224,7 @@ export const BananaFeverDream: React.FC = () => {
               {/* Game Controls - left side */}
               <div className="flex gap-2">
                 <Button
-                  onClick={gameState.status === 'ready' ? handleStartGame : handleResetToReady}
+                  onClick={gameState.status === 'ready' ? handleStartGame : gameOver}
                   size="lg"
                   className="bg-gradient-banana hover:shadow-fever 
                            transition-all duration-300 transform hover:scale-105

@@ -457,14 +457,32 @@ export const useGameState = () => {
           
           if (hasMagnet) {
             // Pull power-ups toward player if within magnet radius
-            const dx = prev.player.position.x - powerUp.position.x;
-            const dy = prev.player.position.y - powerUp.position.y;
+            // Calculate edge-to-edge distance for better accuracy
+            const playerCenterX = prev.player.position.x + prev.player.width / 2;
+            const playerCenterY = prev.player.position.y + prev.player.height / 2;
+            const powerUpCenterX = powerUp.position.x + powerUp.width / 2;
+            const powerUpCenterY = powerUp.position.y + powerUp.height / 2;
+            
+            const dx = playerCenterX - powerUpCenterX;
+            const dy = playerCenterY - powerUpCenterY;
             const distance = Math.sqrt(dx * dx + dy * dy);
             
             if (distance < config.powerUp.magnetRadius && distance > 0) {
-              const magnetStrength = 200;
-              newVelocity.x += (dx / distance) * magnetStrength;
-              newVelocity.y += (dy / distance) * magnetStrength;
+              const magnetStrength = 400; // Increased from 200 to 400
+              const pullX = (dx / distance) * magnetStrength;
+              const pullY = (dy / distance) * magnetStrength;
+              
+              // Add velocity damping when within magnet range to prevent fly-by
+              newVelocity.x = newVelocity.x * 0.7 + pullX;
+              newVelocity.y = newVelocity.y * 0.7 + pullY;
+              
+              // Cap maximum magnet velocity to prevent overshooting
+              const maxMagnetVelocity = 300;
+              const currentSpeed = Math.sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
+              if (currentSpeed > maxMagnetVelocity) {
+                newVelocity.x = (newVelocity.x / currentSpeed) * maxMagnetVelocity;
+                newVelocity.y = (newVelocity.y / currentSpeed) * maxMagnetVelocity;
+              }
             }
           }
           
