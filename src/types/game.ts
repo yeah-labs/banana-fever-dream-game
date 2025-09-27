@@ -1,3 +1,6 @@
+import { GameStatus, PowerUpType, PowerUpRarity, EnemyType, EnemyPattern, BulletType } from './gameEnums';
+import { PowerUpEffect } from './powerUpEffects';
+
 export interface Position {
   x: number;
   y: number;
@@ -27,9 +30,9 @@ export interface Player extends GameObject {
 }
 
 export interface Enemy extends GameObject {
-  type: 'normal' | 'mini-boss' | 'boss' | 'easter-egg';
+  type: EnemyType;
   points: number;
-  pattern: 'zigzag' | 'straight' | 'shielded' | 'splitter';
+  pattern: EnemyPattern;
   lastShot: number;
   hoverStartTime?: number;
   isHovering?: boolean;
@@ -40,18 +43,18 @@ export interface Enemy extends GameObject {
 export interface Bullet extends GameObject {
   damage: number;
   isPlayerBullet: boolean;
-  type: 'normal' | 'banana' | 'sword';
+  type: BulletType;
 }
 
 export interface PowerUp extends GameObject {
-  type: 'spread-shot' | 'shield' | 'score-doubler' | 'magnet' | 'sword' | 'reality-warp';
-  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+  type: PowerUpType;
+  rarity: PowerUpRarity;
   duration: number;
-  effect: any;
+  effect: PowerUpEffect;
 }
 
 export interface GameState {
-  status: 'ready' | 'playing' | 'paused' | 'game-over';
+  status: GameStatus;
   player: Player;
   enemies: Enemy[];
   bullets: Bullet[];
@@ -94,9 +97,9 @@ export interface GameConfig {
   fever: {
     buildRate: number;
     damageMultiplier: {
-      normal: number;
-      miniBoss: number;
-      boss: number;
+      NORMAL: number;
+      MINI_BOSS: number;
+      BOSS: number;
     };
   };
 }

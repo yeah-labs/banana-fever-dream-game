@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, memo } from 'react';
 import { GameState, GameConfig } from '@/types/game';
 import playerMonkeyImage from '@/assets/player-monkey.png';
 
@@ -287,3 +287,5 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
     />
   );
 };
+
+export default memo(GameCanvas);

@@ -1,25 +1,43 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { GameState, GameConfig, Player, Enemy, Bullet, PowerUp, Position } from '@/types/game';
+import { GameState, GameConfig, Player, Enemy, Bullet, PowerUp, Position, GameObject } from '@/types/game';
+import { GameStatus, PowerUpType, PowerUpRarity, EnemyType, EnemyPattern, BulletType } from '@/types/gameEnums';
+import { PowerUpEffect } from '@/types/powerUpEffects';
+import { GAME_CONSTANTS } from '@/config/gameConstants';
+import { useCollisionSystem } from '@/hooks/game/useCollisionSystem';
+import { useGameInputs } from '@/hooks/game/useGameInputs';
+import { validateGameState, sanitizeGameState } from '@/utils/gameValidation';
 
 const DEFAULT_CONFIG: GameConfig = {
-  canvas: { width: 800, height: 600 },
-  player: { speed: 300, bulletSpeed: 400, fireRate: 200, maxHealth: 3 },
-  enemy: { speed: 50, bulletSpeed: 200, spawnRate: 800 },
-  powerUp: { dropRate: 0.15, magnetRadius: 250 },
+  canvas: { width: GAME_CONSTANTS.CANVAS.WIDTH, height: GAME_CONSTANTS.CANVAS.HEIGHT },
+  player: { 
+    speed: GAME_CONSTANTS.PLAYER.SPEED, 
+    bulletSpeed: GAME_CONSTANTS.PLAYER.BULLET_SPEED, 
+    fireRate: GAME_CONSTANTS.PLAYER.FIRE_RATE, 
+    maxHealth: GAME_CONSTANTS.PLAYER.MAX_HEALTH 
+  },
+  enemy: { 
+    speed: GAME_CONSTANTS.ENEMY.SPEED, 
+    bulletSpeed: GAME_CONSTANTS.ENEMY.BULLET_SPEED, 
+    spawnRate: GAME_CONSTANTS.ENEMY.SPAWN_RATE 
+  },
+  powerUp: { 
+    dropRate: GAME_CONSTANTS.POWER_UP.DROP_RATE, 
+    magnetRadius: GAME_CONSTANTS.POWER_UP.MAGNET_RADIUS 
+  },
   fever: { 
-    buildRate: 1, 
-    damageMultiplier: { normal: 1, miniBoss: 0.5, boss: 0.25 } 
+    buildRate: GAME_CONSTANTS.FEVER.BUILD_RATE, 
+    damageMultiplier: GAME_CONSTANTS.FEVER.DAMAGE_MULTIPLIERS 
   }
 };
 
 const createInitialPlayer = (): Player => ({
   id: 'player',
-  position: { x: 400, y: 550 },
+  position: { x: GAME_CONSTANTS.PLAYER.INITIAL_X, y: GAME_CONSTANTS.PLAYER.INITIAL_Y },
   velocity: { x: 0, y: 0 },
-  width: 40,
-  height: 40,
-  health: 3,
-  maxHealth: 3,
+  width: GAME_CONSTANTS.PLAYER.WIDTH,
+  height: GAME_CONSTANTS.PLAYER.HEIGHT,
+  health: GAME_CONSTANTS.PLAYER.MAX_HEALTH,
+  maxHealth: GAME_CONSTANTS.PLAYER.MAX_HEALTH,
   score: 0,
   feverMeter: 0,
   powerUps: [],
@@ -28,7 +46,7 @@ const createInitialPlayer = (): Player => ({
 });
 
 const createInitialState = (): GameState => ({
-  status: 'ready',
+  status: GameStatus.READY,
   player: createInitialPlayer(),
   enemies: [],
   bullets: [],
@@ -51,62 +69,63 @@ const createInitialState = (): GameState => ({
 export const useGameState = () => {
   const [gameState, setGameState] = useState<GameState>(createInitialState());
   const [config] = useState<GameConfig>(DEFAULT_CONFIG);
-  const keysPressed = useRef<Set<string>>(new Set());
   const animationFrameRef = useRef<number>();
-  const secretSequence = useRef<string[]>([]);
   const lastPowerUpSpawn = useRef<number>(0);
   const activePowerUps = useRef<Map<string, { type: PowerUp['type'], endTime: number }>>(new Map());
+  
+  // Use collision system
+  const { checkCollision } = useCollisionSystem();
+  
+  // Handle secret mode activation
+  const handleSecretModeActivated = useCallback(() => {
+    setGameState(prev => ({ ...prev, secretMode: true }));
+  }, []);
+  
+  // Use input system
+  const { isKeyPressed, keysPressed } = useGameInputs({
+    gameStatus: gameState.status,
+    onSecretModeActivated: handleSecretModeActivated
+  });
 
-  // Input handling
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    keysPressed.current.add(event.key.toLowerCase());
-    
-    // Secret mode sequence: H B D
-    const key = event.key.toLowerCase();
-    if (gameState.status === 'ready') {
-      secretSequence.current.push(key);
-      if (secretSequence.current.length > 3) {
-        secretSequence.current = secretSequence.current.slice(-3);
+  // Game state validation
+  const safeSetGameState = useCallback((updater: Parameters<typeof setGameState>[0]) => {
+    setGameState(prev => {
+      const newState = typeof updater === 'function' ? updater(prev) : updater;
+      if (!validateGameState(newState)) {
+        console.warn('Invalid game state detected, sanitizing...');
+        return sanitizeGameState(newState);
       }
-      
-      if (secretSequence.current.join('') === 'hbd') {
-        setGameState(prev => ({ ...prev, secretMode: true }));
-        // TODO: Add confetti animation
-      }
-    }
-  }, [gameState.status]);
-
-  const handleKeyUp = useCallback((event: KeyboardEvent) => {
-    keysPressed.current.delete(event.key.toLowerCase());
+      return newState;
+    });
   }, []);
 
   // Game actions
   const startGame = useCallback(() => {
-    setGameState(prev => ({
+    safeSetGameState(prev => ({
       ...createInitialState(),
-      status: 'playing',
+      status: GameStatus.PLAYING,
       secretMode: prev.secretMode,
       lastFrame: performance.now()
     }));
   }, []);
 
   const resetToReady = useCallback(() => {
-    setGameState(prev => ({
+    safeSetGameState(prev => ({
       ...createInitialState(),
-      status: 'ready',
+      status: GameStatus.READY,
       secretMode: false
     }));
   }, []);
 
   const pauseGame = useCallback(() => {
-    setGameState(prev => ({ 
+    safeSetGameState(prev => ({
       ...prev, 
-      status: prev.status === 'paused' ? 'playing' : 'paused' 
+      status: prev.status === GameStatus.PAUSED ? GameStatus.PLAYING : GameStatus.PAUSED 
     }));
   }, []);
 
   const gameOver = useCallback(() => {
-    setGameState(prev => ({ ...prev, status: 'game-over' }));
+    safeSetGameState(prev => ({ ...prev, status: GameStatus.GAME_OVER }));
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -136,7 +155,7 @@ export const useGameState = () => {
         const updatedEnemies = prev.enemies.map(enemy => {
           let newEnemy = { ...enemy };
           
-          if (enemy.type === 'normal') {
+          if (enemy.type === EnemyType.NORMAL) {
             // Normal enemies are killed instantly
             if (enemy.health > 0) {
               const killReward = handleEnemyKill(enemy);
@@ -145,9 +164,9 @@ export const useGameState = () => {
               enemiesKilled++;
             }
             newEnemy.health = 0;
-          } else if (enemy.type === 'mini-boss') {
+          } else if (enemy.type === EnemyType.MINI_BOSS) {
             newEnemy.health = Math.max(0, enemy.health - enemy.maxHealth * 0.5);
-          } else if (enemy.type === 'boss') {
+          } else if (enemy.type === EnemyType.BOSS) {
             newEnemy.health = Math.max(0, enemy.health - enemy.maxHealth * 0.25);
           }
           return newEnemy;
@@ -168,20 +187,12 @@ export const useGameState = () => {
     }
   }, [gameState.player.feverMeter, handleEnemyKill]);
 
-  // Collision detection
-  const checkCollision = useCallback((obj1: any, obj2: any): boolean => {
-    return (
-      obj1.position.x < obj2.position.x + obj2.width &&
-      obj1.position.x + obj1.width > obj2.position.x &&
-      obj1.position.y < obj2.position.y + obj2.height &&
-      obj1.position.y + obj1.height > obj2.position.y
-    );
-  }, []);
+  // Collision detection is now handled by useCollisionSystem hook
 
   // Power-up spawning with rarity system
   const spawnRandomPowerUp = useCallback(() => {
     const currentTime = performance.now();
-    const spawnInterval = 8000; // Spawn every 8 seconds
+    const spawnInterval = GAME_CONSTANTS.POWER_UP.SPAWN_INTERVAL;
     
     if (currentTime - lastPowerUpSpawn.current < spawnInterval) return;
     
@@ -190,16 +201,16 @@ export const useGameState = () => {
     // Rarity-based weighted selection
     const powerUpPool = [
       // Common (35% total)
-      { type: 'shield' as const, rarity: 'common' as const, weight: 35 },
+      { type: PowerUpType.SHIELD, rarity: PowerUpRarity.COMMON, weight: 35 },
       // Uncommon (40%)
-      { type: 'spread-shot' as const, rarity: 'uncommon' as const, weight: 20 },
-      { type: 'score-doubler' as const, rarity: 'uncommon' as const, weight: 20 },
+      { type: PowerUpType.SPREAD_SHOT, rarity: PowerUpRarity.UNCOMMON, weight: 20 },
+      { type: PowerUpType.SCORE_DOUBLER, rarity: PowerUpRarity.UNCOMMON, weight: 20 },
       // Rare (15%)
-      { type: 'magnet' as const, rarity: 'rare' as const, weight: 15 },
+      { type: PowerUpType.MAGNET, rarity: PowerUpRarity.RARE, weight: 15 },
       // Epic (9%)
-      { type: 'sword' as const, rarity: 'epic' as const, weight: 9 },
+      { type: PowerUpType.SWORD, rarity: PowerUpRarity.EPIC, weight: 9 },
       // Legendary (1%)
-      { type: 'reality-warp' as const, rarity: 'legendary' as const, weight: 1 }
+      { type: PowerUpType.REALITY_WARP, rarity: PowerUpRarity.LEGENDARY, weight: 1 }
     ];
     
     const totalWeight = powerUpPool.reduce((sum, item) => sum + item.weight, 0);
@@ -221,19 +232,15 @@ export const useGameState = () => {
           x: Math.random() * (config.canvas.width - 20),
           y: -20
         },
-        velocity: { x: 0, y: 80 },
-        width: 20,
-        height: 20,
+        velocity: { x: 0, y: GAME_CONSTANTS.POWER_UP.FALL_SPEED },
+        width: GAME_CONSTANTS.POWER_UP.WIDTH,
+        height: GAME_CONSTANTS.POWER_UP.HEIGHT,
         health: 1,
         maxHealth: 1,
         type: selectedPowerUp.type,
         rarity: selectedPowerUp.rarity,
-        duration: selectedPowerUp.type === 'shield' ? 5000 : 
-                  selectedPowerUp.type === 'score-doubler' ? 10000 :
-                  selectedPowerUp.type === 'magnet' ? 10000 :
-                  selectedPowerUp.type === 'sword' ? 10000 :
-                  selectedPowerUp.type === 'reality-warp' ? 10000 : 5000,
-        effect: {}
+        duration: GAME_CONSTANTS.POWER_UP.DURATIONS[selectedPowerUp.type as keyof typeof GAME_CONSTANTS.POWER_UP.DURATIONS] || 5000,
+        effect: {} as PowerUpEffect
       };
       
       return {
@@ -255,8 +262,8 @@ export const useGameState = () => {
       const newBullets: Bullet[] = [];
       
       // Check for power-ups
-      const hasSpreadShot = activePowerUps.current.has('spread-shot');
-      const hasSword = activePowerUps.current.has('sword');
+      const hasSpreadShot = activePowerUps.current.has(PowerUpType.SPREAD_SHOT);
+      const hasSword = activePowerUps.current.has(PowerUpType.SWORD);
       
       if (hasSword) {
         // Sword power-up: Single powerful sword bullet
@@ -276,7 +283,7 @@ export const useGameState = () => {
           maxHealth: 1,
           damage: 5, // 5x normal bullet damage
           isPlayerBullet: true,
-          type: 'sword'
+          type: BulletType.SWORD
         };
         newBullets.push(newBullet);
       } else if (hasSpreadShot) {
@@ -298,7 +305,7 @@ export const useGameState = () => {
             maxHealth: 1,
             damage: 1,
             isPlayerBullet: true,
-            type: 'normal'
+            type: BulletType.NORMAL
           };
           newBullets.push(newBullet);
         }
@@ -317,7 +324,7 @@ export const useGameState = () => {
           maxHealth: 1,
           damage: 1,
           isPlayerBullet: true,
-          type: 'normal'
+          type: BulletType.NORMAL
         };
         newBullets.push(newBullet);
       }
@@ -360,9 +367,9 @@ export const useGameState = () => {
           height: 80,
           health: 8 + (prev.level - 1) * 1, // 8+ health scaling (+1 per level)
           maxHealth: 8 + (prev.level - 1) * 1,
-          type: 'boss',
+          type: EnemyType.BOSS,
           points: 1000 + prev.level * 200,
-          pattern: 'shielded',
+          pattern: EnemyPattern.SHIELDED,
           lastShot: 0,
           hoverThreshold: 0.2 + Math.random() * 0.1 // Random between 20-30%
         };
@@ -381,9 +388,9 @@ export const useGameState = () => {
           height: 50,
           health: 3 + (prev.level - 1) * 1, // 3+ health scaling (+1 per level)
           maxHealth: 3 + (prev.level - 1) * 1,
-          type: 'mini-boss',
+          type: EnemyType.MINI_BOSS,
           points: 300 + prev.level * 50,
-          pattern: 'zigzag',
+          pattern: EnemyPattern.ZIGZAG,
           lastShot: 0,
           hoverThreshold: 0.2 + Math.random() * 0.1 // Random between 20-30%
         };
@@ -405,9 +412,9 @@ export const useGameState = () => {
             height: 30,
             health: 1,
             maxHealth: 1,
-            type: 'normal',
+            type: EnemyType.NORMAL,
             points: 100,
-            pattern: 'straight',
+            pattern: EnemyPattern.STRAIGHT,
             lastShot: 0
           };
           newEnemies.push(newEnemy);
@@ -450,7 +457,7 @@ export const useGameState = () => {
         );
 
       // Update power-ups with magnet effect
-      const hasMagnet = activePowerUps.current.has('magnet');
+      const hasMagnet = activePowerUps.current.has(PowerUpType.MAGNET);
       const updatedPowerUps = prev.powerUps
         .map(powerUp => {
           let newVelocity = { ...powerUp.velocity };
@@ -468,16 +475,16 @@ export const useGameState = () => {
             const distance = Math.sqrt(dx * dx + dy * dy);
             
             if (distance < config.powerUp.magnetRadius && distance > 0) {
-              const magnetStrength = 800; // Increased for faster pull
+              const magnetStrength = GAME_CONSTANTS.MAGNET.STRENGTH;
               const pullX = (dx / distance) * magnetStrength;
               const pullY = (dy / distance) * magnetStrength;
               
               // Add velocity damping when within magnet range to prevent fly-by
-              newVelocity.x = newVelocity.x * 0.8 + pullX;
-              newVelocity.y = newVelocity.y * 0.8 + pullY;
+              newVelocity.x = newVelocity.x * GAME_CONSTANTS.MAGNET.VELOCITY_DAMPING + pullX;
+              newVelocity.y = newVelocity.y * GAME_CONSTANTS.MAGNET.VELOCITY_DAMPING + pullY;
               
               // Cap maximum magnet velocity to prevent overshooting
-              const maxMagnetVelocity = 600;
+              const maxMagnetVelocity = GAME_CONSTANTS.MAGNET.MAX_VELOCITY;
               const currentSpeed = Math.sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
               if (currentSpeed > maxMagnetVelocity) {
                 newVelocity.x = (newVelocity.x / currentSpeed) * maxMagnetVelocity;
@@ -532,8 +539,8 @@ export const useGameState = () => {
             }
           }
           
-          // Check for hover zone entry (bosses and mini-bosses)
-          if ((enemy.type === 'mini-boss' || enemy.type === 'boss') && !enemy.isHovering && enemy.hoverThreshold) {
+      // Check for hover zone entry (bosses and mini-bosses)
+      if ((enemy.type === EnemyType.MINI_BOSS || enemy.type === EnemyType.BOSS) && !enemy.isHovering && enemy.hoverThreshold) {
             const hoverThreshold = config.canvas.height * enemy.hoverThreshold; // Use randomized threshold
               
             if (enemy.position.y >= hoverThreshold) {
@@ -545,7 +552,7 @@ export const useGameState = () => {
           
           // Apply movement patterns with hover logic
           switch (enemy.pattern) {
-            case 'zigzag':
+            case EnemyPattern.ZIGZAG:
               // Mini-boss zigzag pattern
               const zigzagTime = (currentTime / 1000) % 4; // 4-second cycle
               newVelocity.x = Math.sin(zigzagTime * Math.PI) * 80;
@@ -561,7 +568,7 @@ export const useGameState = () => {
               }
               break;
               
-            case 'shielded':
+            case EnemyPattern.SHIELDED:
               // Boss defensive movement - slower, side-to-side
               const shieldTime = (currentTime / 1500) % (Math.PI * 2);
               newVelocity.x = Math.sin(shieldTime) * 60;
@@ -579,7 +586,7 @@ export const useGameState = () => {
               }
               break;
               
-            case 'straight':
+            case EnemyPattern.STRAIGHT:
             default:
               // Normal enemy movement - no change needed
               break;
@@ -619,9 +626,9 @@ export const useGameState = () => {
           activePowerUps.current.set(powerUp.type, { type: powerUp.type, endTime });
           
           // Apply immediate effects
-          if (powerUp.type === 'shield') {
+          if (powerUp.type === PowerUpType.SHIELD) {
             // Shield effect handled in damage calculation
-          } else if (powerUp.type === 'reality-warp') {
+          } else if (powerUp.type === PowerUpType.REALITY_WARP) {
             // Activate Reality Storm for 10 seconds
             setGameState(currentState => ({
               ...currentState,
@@ -638,7 +645,7 @@ export const useGameState = () => {
 
       // Check player-enemy collisions
       let playerDamaged = false;
-      const hasShield = activePowerUps.current.has('shield');
+      const hasShield = activePowerUps.current.has(PowerUpType.SHIELD);
       if (!prev.player.invulnerable && !hasShield) {
         updatedEnemies.forEach(enemy => {
           if (checkCollision(prev.player, enemy)) {
@@ -710,7 +717,7 @@ export const useGameState = () => {
       if (playerDamaged) {
         newPlayer.health = Math.max(0, newPlayer.health - 1);
         newPlayer.invulnerable = true;
-        newPlayer.invulnerabilityTime = 2000; // 2 seconds of invulnerability
+        newPlayer.invulnerabilityTime = GAME_CONSTANTS.PLAYER.INVULNERABILITY_TIME;
       }
 
       // Check if Reality Storm has ended and award survival bonus
@@ -752,21 +759,21 @@ export const useGameState = () => {
     setGameState(prev => {
       const newVelocity = { x: 0, y: 0 };
       
-      if (keysPressed.current.has('a') || keysPressed.current.has('arrowleft')) {
+      if (isKeyPressed('a') || isKeyPressed('arrowleft')) {
         newVelocity.x = -config.player.speed;
       }
-      if (keysPressed.current.has('d') || keysPressed.current.has('arrowright')) {
+      if (isKeyPressed('d') || isKeyPressed('arrowright')) {
         newVelocity.x = config.player.speed;
       }
-      if (keysPressed.current.has('w') || keysPressed.current.has('arrowup')) {
+      if (isKeyPressed('w') || isKeyPressed('arrowup')) {
         newVelocity.y = -config.player.speed;
       }
-      if (keysPressed.current.has('s') || keysPressed.current.has('arrowdown')) {
+      if (isKeyPressed('s') || isKeyPressed('arrowdown')) {
         newVelocity.y = config.player.speed;
       }
 
       // Handle shooting
-      if (keysPressed.current.has(' ')) {
+      if (isKeyPressed(' ')) {
         shoot();
       }
 
@@ -789,11 +796,11 @@ export const useGameState = () => {
         shakeIntensity: Math.max(0, prev.shakeIntensity - deltaTime * 30)
       };
     });
-  }, [config, keysPressed, shoot]);
+  }, [config, isKeyPressed, shoot]);
 
   // Game loop
   const gameLoop = useCallback((timestamp: number) => {
-    if (gameState.status === 'playing') {
+    if (gameState.status === GameStatus.PLAYING) {
       const deltaTime = (timestamp - gameState.lastFrame) / 1000;
       
       updatePlayer(deltaTime);
@@ -813,7 +820,7 @@ export const useGameState = () => {
 
   // Start/stop game loop
   useEffect(() => {
-    if (gameState.status === 'playing') {
+    if (gameState.status === GameStatus.PLAYING) {
       animationFrameRef.current = requestAnimationFrame(gameLoop);
     } else if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -826,16 +833,7 @@ export const useGameState = () => {
     };
   }, [gameState.status, gameLoop]);
 
-  // Event listeners
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [handleKeyDown, handleKeyUp]);
+  // Event listeners are now handled by useGameInputs hook
 
   return {
     gameState,
