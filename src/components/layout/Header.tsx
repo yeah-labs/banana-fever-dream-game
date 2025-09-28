@@ -13,12 +13,12 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-yellow-400 to-orange-500 shadow-lg">
+    <header className="bg-gradient-banana-subtle shadow-banana font-mono">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-12">
           {/* Logo/Brand */}
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl font-bold text-primary-foreground">
               🍌 Banana Fever Dream
             </h1>
           </div>
@@ -28,7 +28,7 @@ const Header: React.FC = () => {
             {address ? (
               <div className="flex items-center space-x-3">
                 {/* Connected Wallet Address */}
-                <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                <Badge variant="secondary" className="bg-card/20 text-primary-foreground border-border hover:bg-card/20">
                   <User className="w-4 h-4 mr-2" />
                   {formatAddress(address)}
                 </Badge>
@@ -38,7 +38,7 @@ const Header: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={disconnect}
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                  className="bg-card/10 border-border text-primary-foreground hover:bg-card/10 hover:border-border hover:text-primary-foreground"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Disconnect
@@ -47,7 +47,7 @@ const Header: React.FC = () => {
             ) : (
               <ConnectWallet
                 theme="dark"
-                btnTitle="Connect Wallet"
+                btnTitle="Connect"
                 modalTitle="Connect to Banana Fever Dream"
                 modalTitleIcon=""
                 welcomeScreen={{
@@ -57,16 +57,22 @@ const Header: React.FC = () => {
                 modalSize="compact"
                 showThirdwebBranding={false}
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: 'white',
+                  backgroundColor: 'hsl(var(--card) / 0.1)',
+                  border: '1px solid hsl(var(--border))',
+                  color: 'hsl(var(--primary-foreground))',
+                  height: '2rem',
+                  fontSize: '0.875rem',
+                  padding: '0.5rem 0.75rem',
                 }}
                 connectButton={{
-                  label: "Connect Wallet",
+                  label: "Connect",
                   style: {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: 'white',
+                    backgroundColor: 'hsl(var(--card) / 0.1)',
+                    border: '1px solid hsl(var(--border))',
+                    color: 'hsl(var(--primary-foreground))',
+                    height: '2rem',
+                    fontSize: '0.875rem',
+                    padding: '0.5rem 0.75rem',
                   }
                 }}
                 supportedWallets={[

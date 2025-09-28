@@ -75,6 +75,7 @@ export default {
       backgroundImage: {
         'gradient-game': 'var(--gradient-game)',
         'gradient-banana': 'var(--gradient-banana)',
+        'gradient-banana-subtle': 'var(--gradient-banana-subtle)',
         'gradient-fever': 'var(--gradient-fever)',
         'gradient-enemy': 'var(--gradient-enemy)',
       },
