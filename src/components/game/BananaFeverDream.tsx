@@ -239,6 +239,14 @@ export const BananaFeverDream: React.FC = () => {
                 >
                   LEADERBOARD
                 </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-primary hover:bg-primary/10"
+                  onClick={() => window.open('https://forms.gle/mNJY7RjN1rg6WvV88', '_blank')}
+                >
+                  FEEDBACK
+                </Button>
               </div>
 
               {/* Controls hint and power-ups - right side */}
