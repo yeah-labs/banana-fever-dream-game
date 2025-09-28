@@ -90,6 +90,7 @@ export const GameOver: React.FC<GameOverProps> = ({
             variant="outline"
             size="lg"
             className="border-primary hover:bg-primary/10"
+            onClick={() => window.open('https://banana-fever-dream.lovable.app/', '_self')}
           >
             HOME
           </Button>
