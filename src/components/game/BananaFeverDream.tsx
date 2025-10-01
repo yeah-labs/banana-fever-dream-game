@@ -241,7 +241,7 @@ export const BananaFeverDream: React.FC = () => {
                 </Button>
               </div>
 
-              {/* Controls hint and power-ups - right side */}
+              {/* Controls hint - right side */}
               <div className="flex flex-col items-start gap-2">
                 <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border text-xs text-muted-foreground">
                   <div>WASD / Arrows: Move</div>
@@ -249,35 +249,6 @@ export const BananaFeverDream: React.FC = () => {
                   <div>F: Fever</div>
                   <div>P: Pause</div>
                 </div>
-                
-                {/* Active Power-ups */}
-                {gameState.player.powerUps.length > 0 && (
-                  <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border">
-                    <div className="text-xs text-muted-foreground mb-2">Active Power-ups</div>
-                    <div className="flex gap-2 flex-wrap">
-                      {gameState.player.powerUps.map((powerUp, index) => {
-                        const rarityColors = {
-                          common: 'border-secondary bg-secondary/20',
-                          uncommon: 'border-blue-400 bg-blue-400/20',
-                          rare: 'border-powerup bg-powerup/20',
-                          epic: 'border-primary bg-primary/20',
-                          legendary: 'border-pink-400 bg-pink-400/20'
-                        };
-
-                        return (
-                          <div
-                            key={`${powerUp.type}-${index}`}
-                            className={`px-2 py-1 rounded text-xs font-medium border ${
-                              rarityColors[powerUp.rarity]
-                            }`}
-                          >
-                            {powerUp.type.replace('-', ' ')}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>

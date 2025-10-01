@@ -24,7 +24,6 @@ export interface GameObject {
 export interface Player extends GameObject {
   score: number;
   feverMeter: number;
-  powerUps: PowerUp[];
   invulnerable: boolean;
   invulnerabilityTime: number;
 }

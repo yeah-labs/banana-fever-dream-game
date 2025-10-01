@@ -40,7 +40,7 @@ const createInitialPlayer = (): Player => ({
   maxHealth: GAME_CONSTANTS.PLAYER.MAX_HEALTH,
   score: 0,
   feverMeter: 0,
-  powerUps: [],
+
   invulnerable: false,
   invulnerabilityTime: 0
 });
@@ -72,6 +72,7 @@ export const useGameState = () => {
   const animationFrameRef = useRef<number>();
   const lastPowerUpSpawn = useRef<number>(0);
   const activePowerUps = useRef<Map<string, { type: PowerUp['type'], endTime: number }>>(new Map());
+
   
   // Use collision system
   const { checkCollision } = useCollisionSystem();
@@ -694,7 +695,7 @@ export const useGameState = () => {
               enemy.health -= bullet.damage;
               if (enemy.health <= 0 && !killedEnemyIds.has(enemy.id)) {
                 killedEnemyIds.add(enemy.id);
-                const killReward = handleEnemyKill(enemy);
+                const killReward = handleEnemyKill(enemy, prev);
                 scoreIncrease += killReward.points;
                 feverIncrease += killReward.feverIncrease;
                 enemiesKilled++;
