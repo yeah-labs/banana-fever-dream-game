@@ -371,7 +371,9 @@ export const useGameState = () => {
           points: 1000 + prev.level * 200,
           pattern: EnemyPattern.SHIELDED,
           lastShot: 0,
-          hoverThreshold: 0.2 + Math.random() * 0.1 // Random between 20-30%
+          hoverPhase: 0,
+          hoverThresholds: [0.2 + Math.random() * 0.1, 0.4 + Math.random() * 0.1, 0.7 + Math.random() * 0.1],
+          phaseStartTime: 0
         };
         newEnemies.push(boss);
       }
@@ -392,7 +394,9 @@ export const useGameState = () => {
           points: 300 + prev.level * 50,
           pattern: EnemyPattern.ZIGZAG,
           lastShot: 0,
-          hoverThreshold: 0.2 + Math.random() * 0.1 // Random between 20-30%
+          hoverPhase: 0,
+          hoverThresholds: [0.2 + Math.random() * 0.1, 0.4 + Math.random() * 0.1, 0.7 + Math.random() * 0.1],
+          phaseStartTime: 0
         };
         newEnemies.push(miniBoss);
       }
@@ -539,14 +543,45 @@ export const useGameState = () => {
             }
           }
           
-      // Check for hover zone entry (bosses and mini-bosses)
-      if ((enemy.type === EnemyType.MINI_BOSS || enemy.type === EnemyType.BOSS) && !enemy.isHovering && enemy.hoverThreshold) {
-            const hoverThreshold = config.canvas.height * enemy.hoverThreshold; // Use randomized threshold
+          // Multi-phase hover system for bosses and mini-bosses
+          if ((enemy.type === EnemyType.MINI_BOSS || enemy.type === EnemyType.BOSS)) {
+            const currentPhase = enemy.hoverPhase || 0;
+            const thresholds = enemy.hoverThresholds || [];
+            
+            // Check if we should enter a hover phase
+            if (currentPhase < thresholds.length) {
+              const currentThreshold = thresholds[currentPhase];
+              const thresholdY = config.canvas.height * currentThreshold;
               
-            if (enemy.position.y >= hoverThreshold) {
-              updatedEnemy.isHovering = true;
-              updatedEnemy.hoverStartTime = currentTime;
-              updatedEnemy.damageWhenStartedHovering = enemy.health;
+              // If we've reached the threshold and not already hovering
+              if (enemy.position.y >= thresholdY && !enemy.isHovering) {
+                updatedEnemy.isHovering = true;
+                updatedEnemy.hoverStartTime = currentTime;
+                updatedEnemy.phaseStartTime = currentTime;
+                updatedEnemy.damageWhenStartedHovering = enemy.health;
+              }
+              
+              // If we're currently hovering, check if we should end this phase
+              if (enemy.isHovering) {
+                const hoverDuration = currentTime - (enemy.phaseStartTime || 0);
+                const phaseDurations = [5000, 4000, 3000, 2000]; // 5s → 4s → 3s → 2s
+                const currentPhaseDuration = phaseDurations[currentPhase] || 2000;
+                
+                if (hoverDuration >= currentPhaseDuration) {
+                  // Move to next phase
+                  updatedEnemy.hoverPhase = currentPhase + 1;
+                  updatedEnemy.isHovering = false;
+                  updatedEnemy.hoverStartTime = 0;
+                  
+                  // Increase speed for descent phases
+                  const speedMultipliers = [1.0, 1.3, 1.6, 2.0]; // Increasing speed
+                  const speedMultiplier = speedMultipliers[currentPhase + 1] || 2.0;
+                  updatedEnemy.velocity = {
+                    x: enemy.velocity.x * speedMultiplier,
+                    y: enemy.velocity.y * speedMultiplier
+                  };
+                }
+              }
             }
           }
           
@@ -557,14 +592,9 @@ export const useGameState = () => {
               const zigzagTime = (currentTime / 1000) % 4; // 4-second cycle
               newVelocity.x = Math.sin(zigzagTime * Math.PI) * 80;
               
-              // Hover behavior: stop Y movement for 3-4 seconds, then slow descent
+              // Hover behavior: stop Y movement during hover phases
               if (updatedEnemy.isHovering) {
-                const hoverDuration = currentTime - (updatedEnemy.hoverStartTime || 0);
-                if (hoverDuration < 3500) { // Hover for 3.5 seconds
-                  newVelocity.y = 0;
-                } else {
-                  newVelocity.y = enemy.velocity.y * 0.3; // Very slow descent after hovering
-                }
+                newVelocity.y = 0;
               }
               break;
               
@@ -573,16 +603,9 @@ export const useGameState = () => {
               const shieldTime = (currentTime / 1500) % (Math.PI * 2);
               newVelocity.x = Math.sin(shieldTime) * 60;
               
-              // Hover behavior: stop until 50% damage taken, then crawl down
+              // Hover behavior: stop Y movement during hover phases
               if (updatedEnemy.isHovering) {
-                const damagePercentage = (updatedEnemy.damageWhenStartedHovering! - enemy.health) / updatedEnemy.damageWhenStartedHovering!;
-                if (damagePercentage < 0.5) {
-                  newVelocity.y = 0; // Stop until 50% damage
-                } else {
-                  newVelocity.y = enemy.velocity.y * 0.2; // Crawl down after damage
-                }
-              } else {
-                newVelocity.y = enemy.velocity.y * 0.7; // Slower descent before hovering
+                newVelocity.y = 0;
               }
               break;
               
