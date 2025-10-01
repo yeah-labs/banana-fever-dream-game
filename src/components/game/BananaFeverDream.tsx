@@ -85,22 +85,14 @@ export const BananaFeverDream: React.FC = () => {
   const handleStartGame = () => {
     startGame();
     toast.success('Fever Dream begins...', {
-      duration: 2000,
-      style: { 
-        background: 'hsl(120, 40%, 35%)', 
-        color: 'hsl(45, 100%, 85%)'
-      }
+      duration: 2000
     });
   };
 
   const handleResetToReady = () => {
     resetToReady();
     toast.success('Game reset - Ready to play!', {
-      duration: 2000,
-      style: { 
-        background: 'hsl(200, 40%, 35%)', 
-        color: 'hsl(45, 100%, 85%)'
-      }
+      duration: 2000
     });
   };
 
