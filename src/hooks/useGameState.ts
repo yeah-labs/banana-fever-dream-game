@@ -173,9 +173,13 @@ export const useGameState = () => {
           return newEnemy;
         });
 
+        // Destroy all enemy bullets during fever
+        const updatedBullets = prev.bullets.filter(bullet => bullet.isPlayerBullet);
+
         return {
           ...prev,
           enemies: updatedEnemies,
+          bullets: updatedBullets,
           player: { 
             ...prev.player, 
             feverMeter: 0,
@@ -540,6 +544,7 @@ export const useGameState = () => {
 
       // Update enemies with level-based speed and movement patterns
       const enemySpeed = config.enemy.speed + (prev.level - 1) * 20;
+      const newEnemyBullets: Bullet[] = [];
       const updatedEnemies = prev.enemies
         .map(enemy => {
           let newVelocity = { ...enemy.velocity };
@@ -636,6 +641,78 @@ export const useGameState = () => {
               break;
           }
           
+          // Enemy shooting logic for mini-bosses and bosses
+          if ((enemy.type === EnemyType.MINI_BOSS || enemy.type === EnemyType.BOSS) && enemy.position.y > 0) {
+            const shootingCooldown = enemy.type === EnemyType.BOSS ? 1500 : 2500; // Boss: 1.5s, Mini-boss: 2.5s
+            
+            if (currentTime - enemy.lastShot > shootingCooldown) {
+              updatedEnemy.lastShot = currentTime;
+              
+              // Calculate direction toward player
+              const enemyCenterX = enemy.position.x + enemy.width / 2;
+              const enemyCenterY = enemy.position.y + enemy.height / 2;
+              const playerCenterX = prev.player.position.x + prev.player.width / 2;
+              const playerCenterY = prev.player.position.y + prev.player.height / 2;
+              
+              const dx = playerCenterX - enemyCenterX;
+              const dy = playerCenterY - enemyCenterY;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              
+              if (enemy.type === EnemyType.BOSS) {
+                // Boss: 3-bullet spread pattern
+                const angles = [-30, 0, 30]; // degrees
+                angles.forEach(angleDeg => {
+                  const angleRad = (angleDeg * Math.PI) / 180;
+                  const baseAngle = Math.atan2(dy, dx);
+                  const finalAngle = baseAngle + angleRad;
+                  
+                  const bulletSpeed = 200;
+                  const newBullet: Bullet = {
+                    id: `enemy-bullet-${Date.now()}-${angleDeg}`,
+                    position: {
+                      x: enemyCenterX - 3,
+                      y: enemyCenterY
+                    },
+                    velocity: {
+                      x: Math.cos(finalAngle) * bulletSpeed,
+                      y: Math.sin(finalAngle) * bulletSpeed
+                    },
+                    width: 6,
+                    height: 6,
+                    health: 1,
+                    maxHealth: 1,
+                    damage: 1,
+                    isPlayerBullet: false,
+                    type: BulletType.NORMAL
+                  };
+                  newEnemyBullets.push(newBullet);
+                });
+              } else {
+                // Mini-boss: Single bullet toward player
+                const bulletSpeed = 200;
+                const newBullet: Bullet = {
+                  id: `enemy-bullet-${Date.now()}`,
+                  position: {
+                    x: enemyCenterX - 3,
+                    y: enemyCenterY
+                  },
+                  velocity: {
+                    x: (dx / distance) * bulletSpeed,
+                    y: (dy / distance) * bulletSpeed
+                  },
+                  width: 6,
+                  height: 6,
+                  health: 1,
+                  maxHealth: 1,
+                  damage: 1,
+                  isPlayerBullet: false,
+                  type: BulletType.NORMAL
+                };
+                newEnemyBullets.push(newBullet);
+              }
+            }
+          }
+          
           // Update position with movement pattern
           newPosition.x = enemy.position.x + newVelocity.x * deltaTime;
           
@@ -698,6 +775,16 @@ export const useGameState = () => {
         });
       }
 
+      // Check enemy bullet-player collisions
+      if (!prev.player.invulnerable && !hasShield) {
+        updatedBullets.forEach(bullet => {
+          if (!bullet.isPlayerBullet && checkCollision(prev.player, bullet)) {
+            playerDamaged = true;
+            bullet.health = 0; // Mark bullet for removal
+          }
+        });
+      }
+
       // Check bullet-enemy collisions
       const remainingBullets: Bullet[] = [];
       const remainingEnemies: Enemy[] = [];
@@ -723,7 +810,8 @@ export const useGameState = () => {
             }
           });
         }
-        if (!bulletHit) {
+        // Keep bullets that haven't hit and still have health (not marked for removal)
+        if (!bulletHit && bullet.health > 0) {
           remainingBullets.push(bullet);
         }
       });
@@ -780,7 +868,7 @@ export const useGameState = () => {
 
       return {
         ...prev,
-        bullets: remainingBullets,
+        bullets: [...remainingBullets, ...newEnemyBullets],
         enemies: remainingEnemies,
         powerUps: remainingPowerUps,
         player: {
