@@ -406,13 +406,33 @@ export const useGameState = () => {
         const enemiesPerSpawn = Math.min(2, Math.floor(prev.level / 2) + 1);
         
         for (let i = 0; i < enemiesPerSpawn; i++) {
+          // 25% chance for diagonal movement
+          const isDiagonal = Math.random() < 0.25;
+          
+          let velocity = { x: 0, y: config.enemy.speed };
+          
+          if (isDiagonal) {
+            // Random angle between 10-15 degrees
+            const angle = (10 + Math.random() * 5) * (Math.random() < 0.5 ? 1 : -1);
+            const radians = angle * Math.PI / 180;
+            
+            // 12% speed boost for diagonal enemies
+            const diagonalSpeed = config.enemy.speed * 1.12;
+            const adjustedSpeed = diagonalSpeed / Math.cos(radians);
+            
+            velocity = {
+              x: Math.sin(radians) * adjustedSpeed,
+              y: adjustedSpeed
+            };
+          }
+          
           const newEnemy: Enemy = {
             id: `enemy-${Date.now()}-${i}`,
             position: {
               x: Math.random() * (config.canvas.width - 40),
               y: -40 - (i * 50)
             },
-            velocity: { x: 0, y: config.enemy.speed },
+            velocity,
             width: 30,
             height: 30,
             health: 1,
@@ -695,7 +715,7 @@ export const useGameState = () => {
               enemy.health -= bullet.damage;
               if (enemy.health <= 0 && !killedEnemyIds.has(enemy.id)) {
                 killedEnemyIds.add(enemy.id);
-                const killReward = handleEnemyKill(enemy, prev);
+                const killReward = handleEnemyKill(enemy);
                 scoreIncrease += killReward.points;
                 feverIncrease += killReward.feverIncrease;
                 enemiesKilled++;
@@ -840,7 +860,7 @@ export const useGameState = () => {
       
       animationFrameRef.current = requestAnimationFrame(gameLoop);
     }
-  }, [gameState.status, gameState.lastFrame, updatePlayer, updateGameObjects, spawnEnemy]);
+  }, [gameState.status, gameState.lastFrame, updatePlayer, updateGameObjects, spawnEnemy, spawnRandomPowerUp]);
 
   // Start/stop game loop
   useEffect(() => {

@@ -23,7 +23,7 @@ export const GAME_CONSTANTS = {
 
   // Enemy settings
   ENEMY: {
-    SPEED: 50,
+    SPEED: 70,
     BULLET_SPEED: 200,
     SPAWN_RATE: 800,
     NORMAL: {
