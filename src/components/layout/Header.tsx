@@ -47,41 +47,9 @@ const Header: React.FC = () => {
             ) : (
               <ConnectWallet
                 theme="dark"
-                btnTitle="Connect"
+                btnTitle="Connect Wallet"
                 modalTitle="Connect to Banana Fever Dream"
-                modalTitleIcon=""
-                welcomeScreen={{
-                  title: "Welcome to Banana Fever Dream!",
-                  subtitle: "Connect your wallet to start playing and earning rewards",
-                }}
                 modalSize="compact"
-                showThirdwebBranding={false}
-                style={{
-                  backgroundColor: 'hsl(var(--card) / 0.1)',
-                  border: '1px solid hsl(var(--border))',
-                  color: 'hsl(var(--primary-foreground))',
-                  height: '2rem',
-                  fontSize: '0.875rem',
-                  padding: '0.5rem 0.75rem',
-                }}
-                connectButton={{
-                  label: "Connect",
-                  style: {
-                    backgroundColor: 'hsl(var(--card) / 0.1)',
-                    border: '1px solid hsl(var(--border))',
-                    color: 'hsl(var(--primary-foreground))',
-                    height: '2rem',
-                    fontSize: '0.875rem',
-                    padding: '0.5rem 0.75rem',
-                  }
-                }}
-                supportedWallets={[
-                  {
-                    name: "Google",
-                    icon: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIyLjU2IDEyLjI1QzIyLjU2IDExLjQ3IDIyLjQ5IDEwLjcyIDIyLjM0IDEwSDEyVjE0LjI1SDE3Ljg5QzE3LjY2IDE1LjY2IDE2Ljg5IDE2Ljg5IDE1LjY2IDE3LjY2VjIwLjE0SDE5LjM0QzIxLjE0IDE4LjU0IDIyLjU2IDE1LjY2IDIyLjU2IDEyLjI1WiIgZmlsbD0iIzQyODVGNCIvPgo8cGF0aCBkPSJNMTIgMjNDNS45MzMgMjMgMSAxOC4wNjcgMSAxMkMxIDUuOTMzIDUuOTMzIDEgMTIgMUMxNC4wNjcgMSAxNS45MzMgMS42NyAxNy4zNCAyLjk5TDE1LjY2IDQuNjZDMTQuNjcgMy44MyAxMy4zNCAzLjI1IDEyIDMuMjVDOC4zNCAzLjI1IDUuMjUgNi4zNCA1LjI1IDEwQzUuMjUgMTMuNjYgOC4zNCAxNi43NSAxMiAxNi43NUMxNS42NiAxNi43NSAxOC43NSAxMy42NiAxOC43NSAxMEgxMlY3LjI1SDIyLjM0QzIyLjQ5IDcuOTggMjIuNTYgOC43NSAyMi41NiA5LjVWMjIuNTZIMTlWMjBIMTZWMjNIMTNaIiBmaWxsPSIjRUE0MzM1Ii8+CjxwYXRoIGQ9Ik0xMiA3LjI1VjEwSDE4Ljc1QzE4LjY2IDkuNDIgMTguNDkgOC44NSAxOC4yNSA4LjMzTDE2LjU5IDkuOTlDMTYuMDggOS4xNyAxNS4xNyA4LjUgMTQgOC41SDEyVjcuMjVaIiBmaWxsPSIjRkJCQzA0Ii8+CjxwYXRoIGQ9Ik0xMiAxNi43NUMxMy4zNCAxNi43NSAxNC42NyAxNi4xNyAxNS42NiAxNS4zNEwxNy4zNCAxNy4wMkMxNS45MzMgMTguMzMgMTQuMDY3IDE5IDEyIDE5QzguMzQgMTkgNS4yNSAxNS45MSA1LjI1IDEyLjI1SDEyVjE2Ljc1WiIgZmlsbD0iIzM0QTg1MyIvPgo8L3N2Zz4K",
-                    walletId: "google",
-                  },
-                ]}
               />
             )}
           </div>
