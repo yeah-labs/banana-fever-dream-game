@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ThirdwebProvider } from "@thirdweb-dev/react";
+import { ThirdwebProvider } from "thirdweb/react";
 import Header from "@/components/layout/Header";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -13,10 +13,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <ErrorBoundary>
-    <ThirdwebProvider
-      activeChain="ethereum"
-      clientId={import.meta.env.VITE_THIRDWEB_CLIENT_ID || "your-client-id"}
-    >
+    <ThirdwebProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
