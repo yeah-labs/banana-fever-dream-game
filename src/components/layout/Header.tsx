@@ -1,26 +1,10 @@
 import React from 'react';
-import { createThirdwebClient } from "thirdweb";
 import { ConnectButton, useActiveAccount, useActiveWallet, useDisconnect } from "thirdweb/react";
 import { inAppWallet, createWallet } from "thirdweb/wallets";
-import { defineChain } from "thirdweb/chains";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, User } from 'lucide-react';
-
-const client = createThirdwebClient({
-  clientId: import.meta.env.VITE_THIRDWEB_CLIENT_ID || "your-client-id",
-});
-
-// ApeChain Curtis Testnet
-const curtis = defineChain({
-  id: 33111,
-  rpc: "https://33111.rpc.thirdweb.com",
-  nativeCurrency: {
-    name: "ApeCoin",
-    symbol: "APE",
-    decimals: 18,
-  },
-});
+import { client, curtis } from '@/lib/thirdweb';
 
 const wallets = [
   inAppWallet({

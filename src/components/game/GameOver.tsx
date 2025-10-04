@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { GameState } from '@/types/game';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
+import { toast } from 'sonner';
+import { Trophy } from 'lucide-react';
 
 interface GameOverProps {
   gameState: GameState;
@@ -15,9 +19,36 @@ export const GameOver: React.FC<GameOverProps> = ({
   onRestart, 
   onMainMenu
 }) => {
+  const navigate = useNavigate();
   const { player, level, wave, gameTime } = gameState;
   const timeMinutes = Math.floor(gameTime / 60);
   const timeSeconds = Math.floor(gameTime % 60);
+  
+  const { submitScore, isSubmitting, isConnected } = useLeaderboard();
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
+  // Auto-submit score when game ends if wallet is connected
+  useEffect(() => {
+    const submitGameScore = async () => {
+      if (isConnected && player.score > 0 && !hasSubmitted) {
+        setHasSubmitted(true);
+        const success = await submitScore(player.score);
+        if (success) {
+          toast.success('Score submitted to leaderboard!', {
+            duration: 3000,
+            action: {
+              label: 'View Leaderboard',
+              onClick: () => navigate('/leaderboard'),
+            },
+          });
+        } else {
+          toast.error('Failed to submit score. It may not be higher than your current best.');
+        }
+      }
+    };
+
+    submitGameScore();
+  }, [isConnected, player.score, hasSubmitted, submitScore, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-game flex items-center justify-center p-4">
@@ -30,6 +61,31 @@ export const GameOver: React.FC<GameOverProps> = ({
           <p className="text-lg text-muted-foreground">
             The Pith have overtaken the swamp... for now.
           </p>
+          
+          {/* Connection Status */}
+          {!isConnected && (
+            <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3">
+              <p className="text-sm text-yellow-200">
+                💡 Connect your wallet to save your scores to the leaderboard!
+              </p>
+            </div>
+          )}
+          
+          {isConnected && isSubmitting && (
+            <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-3">
+              <p className="text-sm text-blue-200">
+                Submitting your score to the blockchain...
+              </p>
+            </div>
+          )}
+          
+          {isConnected && hasSubmitted && !isSubmitting && (
+            <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-3">
+              <p className="text-sm text-green-200">
+                ✅ Score submitted successfully!
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Final Stats */}
@@ -85,6 +141,15 @@ export const GameOver: React.FC<GameOverProps> = ({
                      transition-all duration-300 transform hover:scale-105"
           >
             PLAY AGAIN
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            className="border-primary hover:bg-primary/10"
+            onClick={() => navigate('/leaderboard')}
+          >
+            <Trophy className="w-4 h-4 mr-2" />
+            LEADERBOARD
           </Button>
           <Button
             variant="outline"

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGameState } from '@/hooks/useGameState';
 import { GameCanvas } from './GameCanvas';
 
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 export const BananaFeverDream: React.FC = () => {
+  const navigate = useNavigate();
   const { gameState, config, startGame, resetToReady, pauseGame, gameOver, activateFever } = useGameState();
 
   // Handle keyboard shortcuts
@@ -99,6 +101,10 @@ export const BananaFeverDream: React.FC = () => {
   const handleMainMenu = () => {
     // Reset to ready state instead of reloading
     window.location.reload();
+  };
+
+  const handleLeaderboardClick = () => {
+    navigate('/leaderboard');
   };
 
   const renderCurrentScreen = () => {
@@ -228,6 +234,7 @@ export const BananaFeverDream: React.FC = () => {
                   variant="outline"
                   size="lg"
                   className="border-primary hover:bg-primary/10"
+                  onClick={handleLeaderboardClick}
                 >
                   LEADERBOARD
                 </Button>
