@@ -162,7 +162,7 @@ const Leaderboard: React.FC = () => {
                     
                     return (
                       <TableRow 
-                        key={entry.player}
+                        key={`${entry.player}-${entry.timestamp}`}
                         className={isCurrentUser ? 'bg-primary/10' : ''}
                       >
                         <TableCell>
@@ -191,16 +191,6 @@ const Leaderboard: React.FC = () => {
                 </TableBody>
               </Table>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Info Card */}
-        <Card className="bg-card/80 backdrop-blur-sm">
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground space-y-2">
-              <p>• Only your best score is recorded</p>
-              <p>• Connect your wallet to rank on the board</p>
-            </div>
           </CardContent>
         </Card>
       </div>

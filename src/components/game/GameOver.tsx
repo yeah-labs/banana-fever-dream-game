@@ -51,7 +51,7 @@ export const GameOver: React.FC<GameOverProps> = ({
   }, [isConnected, player.score, hasSubmitted, submitScore, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-game flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-game flex justify-center p-4 pt-8">
       <div className="max-w-2xl w-full space-y-8">
         {/* Game Over Title */}
         <div className="text-center space-y-4">
@@ -148,7 +148,6 @@ export const GameOver: React.FC<GameOverProps> = ({
             className="border-primary hover:bg-primary/10"
             onClick={() => navigate('/leaderboard')}
           >
-            <Trophy className="w-4 h-4 mr-2" />
             LEADERBOARD
           </Button>
           <Button

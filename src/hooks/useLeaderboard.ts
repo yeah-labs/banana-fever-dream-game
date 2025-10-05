@@ -6,7 +6,7 @@ import { LeaderboardEntry, LeaderboardState } from '@/types/leaderboard';
 import { client, curtis } from '@/lib/thirdweb';
 
 // Deployed contract address on ApeChain Curtis Testnet
-const CONTRACT_ADDRESS = "0xf31101fe38e8841b0477766040b742b1d40b83ff";
+const CONTRACT_ADDRESS = "0xc2b0fd0536590ef616f361e3a4f6ff15a8e36c51";
 
 // Contract ABI (only the functions we need)
 const CONTRACT_ABI = [
