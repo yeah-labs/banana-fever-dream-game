@@ -101,7 +101,7 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-mono overflow-hidden;
+    @apply bg-background text-foreground font-mono;
   }
 
   /* Game-specific animations */

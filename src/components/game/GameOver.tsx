@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { GameState } from '@/types/game';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
-import { toast } from 'sonner';
 import { Trophy } from 'lucide-react';
 
 interface GameOverProps {
@@ -26,29 +25,24 @@ export const GameOver: React.FC<GameOverProps> = ({
   
   const { submitScore, isSubmitting, isConnected } = useLeaderboard();
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [userCancelled, setUserCancelled] = useState(false);
 
   // Auto-submit score when game ends if wallet is connected
   useEffect(() => {
     const submitGameScore = async () => {
-      if (isConnected && player.score > 0 && !hasSubmitted) {
+      if (isConnected && player.score > 0 && !hasSubmitted && !userCancelled) {
         setHasSubmitted(true);
         const success = await submitScore(player.score);
-        if (success) {
-          toast.success('Score submitted to leaderboard!', {
-            duration: 3000,
-            action: {
-              label: 'View Leaderboard',
-              onClick: () => navigate('/leaderboard'),
-            },
-          });
-        } else {
-          toast.error('Failed to submit score. It may not be higher than your current best.');
+        if (!success) {
+          // User cancelled or transaction failed - honor their choice
+          setUserCancelled(true);
+          setHasSubmitted(false);
         }
       }
     };
 
     submitGameScore();
-  }, [isConnected, player.score, hasSubmitted, submitScore, navigate]);
+  }, [isConnected, player.score, hasSubmitted, userCancelled, submitScore]);
 
   return (
     <div className="min-h-screen bg-gradient-game flex justify-center p-4 pt-8">
@@ -83,6 +77,14 @@ export const GameOver: React.FC<GameOverProps> = ({
             <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-3">
               <p className="text-sm text-green-200">
                 ✅ Score submitted successfully!
+              </p>
+            </div>
+          )}
+          
+          {isConnected && userCancelled && !isSubmitting && (
+            <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3">
+              <p className="text-sm text-yellow-200">
+                ⚠️ Score submission cancelled. Your score was not saved to the leaderboard.
               </p>
             </div>
           )}
@@ -157,14 +159,6 @@ export const GameOver: React.FC<GameOverProps> = ({
             onClick={() => window.open('https://forms.gle/mNJY7RjN1rg6WvV88', '_blank')}
           >
             FEEDBACK
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="border-primary hover:bg-primary/10"
-            onClick={() => window.open('https://banana-fever-dream.lovable.app/', '_self')}
-          >
-            HOME
           </Button>
         </div>
 

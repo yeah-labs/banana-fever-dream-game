@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ConnectButton, useActiveAccount, useActiveWallet, useDisconnect } from "thirdweb/react";
 import { inAppWallet, createWallet, smartWallet } from "thirdweb/wallets";
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ const wallets = [
 ];
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
   const account = useActiveAccount();
   const wallet = useActiveWallet();
   const { disconnect } = useDisconnect();
@@ -45,9 +47,12 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center h-12">
           {/* Logo/Brand */}
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-primary-foreground">
+            <button 
+              onClick={() => window.open('https://banana-fever-dream.lovable.app/', '_self')}
+              className="text-2xl font-bold text-primary-foreground cursor-pointer"
+            >
               🍌 Banana Fever Dream
-            </h1>
+            </button>
           </div>
 
           {/* Wallet Connection Section */}
