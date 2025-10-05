@@ -1,12 +1,8 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useActiveAccount } from 'thirdweb/react';
-import { prepareContractCall, readContract, getContract } from 'thirdweb';
-import { useSendTransaction } from 'thirdweb/react';
+import { prepareContractCall, readContract, getContract, sendAndConfirmTransaction } from 'thirdweb';
 import { LeaderboardEntry, LeaderboardState } from '@/types/leaderboard';
-import { client, curtis } from '@/lib/thirdweb';
-
-// Deployed contract address on ApeChain Curtis Testnet
-const CONTRACT_ADDRESS = "0xc2b0fd0536590ef616f361e3a4f6ff15a8e36c51";
+import { client, curtis, LEADERBOARD_CONTRACT_ADDRESS } from '@/lib/thirdweb';
 
 // Contract ABI (only the functions we need)
 const CONTRACT_ABI = [
@@ -52,7 +48,6 @@ const CONTRACT_ABI = [
 
 export const useLeaderboard = () => {
   const account = useActiveAccount();
-  const { mutate: sendTransaction, isPending: isSubmitting } = useSendTransaction();
   
   const [leaderboardState, setLeaderboardState] = useState<LeaderboardState>({
     entries: [],
@@ -61,11 +56,13 @@ export const useLeaderboard = () => {
     lastUpdated: null,
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Get contract instance (memoized to prevent recreation on every render)
   const contract = useMemo(() => getContract({
     client,
     chain: curtis,
-    address: CONTRACT_ADDRESS,
+    address: LEADERBOARD_CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
   }), []);
 
@@ -119,7 +116,7 @@ export const useLeaderboard = () => {
   }, [contract]);
 
   /**
-   * Submit a score to the leaderboard
+   * Submit a score to the leaderboard with gas sponsorship
    */
   const submitScore = useCallback(async (score: number): Promise<boolean> => {
     if (!account) {
@@ -132,32 +129,37 @@ export const useLeaderboard = () => {
       return false;
     }
 
+    setIsSubmitting(true);
+
     try {
+      // Prepare the transaction
       const transaction = prepareContractCall({
         contract,
         method: "submitScore",
         params: [BigInt(score)],
       });
 
-      return new Promise((resolve) => {
-        sendTransaction(transaction, {
-          onSuccess: () => {
-            console.log('Score submitted successfully');
-            // Refresh leaderboard after submission
-            fetchLeaderboard();
-            resolve(true);
-          },
-          onError: (error) => {
-            console.error('Error submitting score:', error);
-            resolve(false);
-          },
-        });
+      // Send transaction with gas sponsorship
+      // This will automatically use thirdweb's paymaster if configured in the dashboard
+      const result = await sendAndConfirmTransaction({
+        transaction,
+        account,
       });
+
+      console.log('Score submitted successfully (gas sponsored):', result.transactionHash);
+      
+      // Refresh leaderboard after submission
+      await fetchLeaderboard();
+      
+      setIsSubmitting(false);
+      return true;
+      
     } catch (error) {
-      console.error('Error preparing transaction:', error);
+      console.error('Error submitting score:', error);
+      setIsSubmitting(false);
       return false;
     }
-  }, [account, contract, sendTransaction, fetchLeaderboard]);
+  }, [account, contract, fetchLeaderboard]);
 
   /**
    * Get a specific player's score

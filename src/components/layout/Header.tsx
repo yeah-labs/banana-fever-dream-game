@@ -1,12 +1,19 @@
 import React from 'react';
 import { ConnectButton, useActiveAccount, useActiveWallet, useDisconnect } from "thirdweb/react";
-import { inAppWallet, createWallet } from "thirdweb/wallets";
+import { inAppWallet, createWallet, smartWallet } from "thirdweb/wallets";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, User } from 'lucide-react';
-import { client, curtis } from '@/lib/thirdweb';
+import { client, curtis, ACCOUNT_FACTORY_ADDRESS } from '@/lib/thirdweb';
 
 const wallets = [
+  // Smart wallet with gasless transactions
+  smartWallet({
+    chain: curtis,
+    factoryAddress: ACCOUNT_FACTORY_ADDRESS,
+    gasless: true, // Enable gasless transactions
+  }),
+  // Regular wallets (users can still connect with these)
   inAppWallet({
     auth: {
       options: ["google", "discord", "x"],
@@ -86,6 +93,12 @@ const Header: React.FC = () => {
                   }
                 }}
                 theme="dark"
+                // Enable account abstraction
+                accountAbstraction={{
+                  chain: curtis,
+                  factoryAddress: ACCOUNT_FACTORY_ADDRESS,
+                  gasless: true,
+                }}
               />
             )}
           </div>
