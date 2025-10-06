@@ -50,9 +50,6 @@ export const BananaFeverDream: React.FC = () => {
   useEffect(() => {
     if (gameState.status === 'playing' && gameState.player.health <= 0) {
       gameOver();
-      toast.error('Game Over! The Pith have won...', {
-        duration: 3000
-      });
     }
   }, [gameState.status, gameState.player.health, gameOver]);
 
@@ -72,16 +69,10 @@ export const BananaFeverDream: React.FC = () => {
 
   const handleStartGame = () => {
     startGame();
-    toast.success('Fever Dream begins...', {
-      duration: 2000
-    });
   };
 
   const handleResetToReady = () => {
     resetToReady();
-    toast.success('Game reset - Ready to play!', {
-      duration: 2000
-    });
   };
 
   const handleMainMenu = () => {

@@ -42,12 +42,12 @@ export class ErrorBoundary extends Component<Props, State> {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-center text-muted-foreground">
-                Something went wrong with the game. Don't worry, your progress is safe!
+                Something went wrong with the game
               </p>
               {this.state.error && (
                 <details className="text-xs">
                   <summary className="cursor-pointer">Error Details</summary>
-                  <pre className="mt-2 text-destructive">
+                  <pre className="mt-2 text-destructive whitespace-pre-wrap break-words max-h-40 overflow-y-auto">
                     {this.state.error.message}
                   </pre>
                 </details>
