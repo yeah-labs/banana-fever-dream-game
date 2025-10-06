@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, User } from 'lucide-react';
 import { client, curtis, ACCOUNT_FACTORY_ADDRESS } from '@/lib/thirdweb';
+import apechainLogo from '@/assets/poweredby-apechain.png';
 
 const wallets = [
   // Smart wallet with gasless transactions
@@ -54,7 +55,7 @@ const Header: React.FC = () => {
               🍌 Banana Fever Dream
             </button>
             <img 
-              src="/src/assets/poweredby-apechain.png" 
+              src={apechainLogo} 
               alt="Powered by ApeChain" 
               className="h-4 w-auto opacity-80 hover:opacity-100 transition-opacity"
             />
