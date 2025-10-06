@@ -61,6 +61,16 @@ This project is built with:
 - Tailwind CSS
 - ThirdWeb (Web3 wallet integration)
 
+## 🎮 Game Features
+
+- **Fast-paced gameplay** - No pause functionality for continuous action
+- **WASD/Arrow controls** - Move your monkey character
+- **Space to shoot** - Fire bananas at enemies
+- **F key for Fever Mode** - Activate special abilities when meter is full
+- **Gas-free leaderboard** - Submit scores without paying gas fees
+- **Web3 integration** - Connect with MetaMask and other wallets
+- **Smart accounts** - Automatic account abstraction for seamless UX
+
 ## ThirdWeb Integration
 
 This project includes ThirdWeb integration for Web3 wallet connections with social login support.
@@ -124,9 +134,13 @@ The leaderboard now supports **completely gas-free score submissions** using thi
 
 ### 📚 Documentation
 
-- **Quick Start**: See `QUICK_START_GAS_SPONSORSHIP.md`
-- **Full Guide**: See `GAS_SPONSORSHIP_SETUP.md`
-- **Success Guide**: See `SMART_ACCOUNT_SUCCESS.md`
+All technical documentation has been organized in the `docs/` folder:
+
+- **Quick Start**: See `docs/setup/QUICK_START_GAS_SPONSORSHIP.md`
+- **Full Guide**: See `docs/setup/GAS_SPONSORSHIP_SETUP.md`
+- **Success Guide**: See `docs/setup/SMART_ACCOUNT_SUCCESS.md`
+- **Implementation Details**: See `docs/implementation/`
+- **Documentation Index**: See `docs/README.md`
 
 ### 💰 Cost Management
 
