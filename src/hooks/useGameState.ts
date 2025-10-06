@@ -118,12 +118,6 @@ export const useGameState = () => {
     }));
   }, []);
 
-  const pauseGame = useCallback(() => {
-    safeSetGameState(prev => ({
-      ...prev, 
-      status: prev.status === GameStatus.PAUSED ? GameStatus.PLAYING : GameStatus.PAUSED 
-    }));
-  }, []);
 
   const gameOver = useCallback(() => {
     safeSetGameState(prev => ({ ...prev, status: GameStatus.GAME_OVER }));
@@ -972,7 +966,6 @@ export const useGameState = () => {
     config,
     startGame,
     resetToReady,
-    pauseGame,
     gameOver,
     activateFever,
     checkCollision,

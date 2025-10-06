@@ -14,8 +14,13 @@ export const useGameInputs = ({ gameStatus, onSecretModeActivated }: UseGameInpu
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     keysPressed.current.add(event.key.toLowerCase());
     
-    // Secret mode sequence: H B D
+    // Prevent default browser behavior for game keys
     const key = event.key.toLowerCase();
+    if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', ' '].includes(key)) {
+      event.preventDefault();
+    }
+    
+    // Secret mode sequence: H B D
     if (gameStatus === GameStatus.READY) {
       secretSequence.current.push(key);
       if (secretSequence.current.length > 3) {

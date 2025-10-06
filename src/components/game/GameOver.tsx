@@ -68,7 +68,7 @@ export const GameOver: React.FC<GameOverProps> = ({
           {isConnected && isSubmitting && (
             <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-3">
               <p className="text-sm text-blue-200">
-                Submitting your score to the blockchain...
+                Submitting your score to ApeChain...
               </p>
             </div>
           )}

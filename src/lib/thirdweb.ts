@@ -3,7 +3,7 @@ import { defineChain } from "thirdweb/chains";
 
 // Create a single ThirdWeb client instance to be shared across the app
 export const client = createThirdwebClient({
-  clientId: import.meta.env.VITE_THIRDWEB_CLIENT_ID || "your-client-id",
+  clientId: import.meta.env.VITE_THIRDWEB_CLIENT_ID || "e6c0a93655383ce4c2c6ae8726aab5b7",
 });
 
 // ApeChain Curtis Testnet configuration
@@ -18,8 +18,8 @@ export const curtis = defineChain({
 });
 
 // Leaderboard contract address
-export const LEADERBOARD_CONTRACT_ADDRESS = "0xc2b0fd0536590ef616f361e3a4f6ff15a8e36c51";
+export const LEADERBOARD_CONTRACT_ADDRESS = import.meta.env.VITE_LEADERBOARD_CONTRACT_ADDRESS || "0xc2b0fd0536590ef616f361e3a4f6ff15a8e36c51";
 
 // Account Factory address for smart accounts
-export const ACCOUNT_FACTORY_ADDRESS = "0x1b853d955330c72c964bb33d624248ff213d9335";
+export const ACCOUNT_FACTORY_ADDRESS = import.meta.env.VITE_ACCOUNT_FACTORY_ADDRESS || "0x1b853d955330c72c964bb33d624248ff213d9335";
 

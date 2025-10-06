@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 export const BananaFeverDream: React.FC = () => {
   const navigate = useNavigate();
-  const { gameState, config, startGame, resetToReady, pauseGame, gameOver, activateFever } = useGameState();
+  const { gameState, config, startGame, resetToReady, gameOver, activateFever } = useGameState();
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -19,9 +19,7 @@ export const BananaFeverDream: React.FC = () => {
       switch (key) {
         case ' ':
           event.preventDefault();
-          if (gameState.status === 'ready') {
-            handleStartGame();
-          }
+          // Space key only shoots, no longer starts the game
           break;
         
         case 'f':
@@ -41,24 +39,12 @@ export const BananaFeverDream: React.FC = () => {
           }
           break;
         
-        case 'p':
-          if (gameState.status === 'playing' || gameState.status === 'paused') {
-            pauseGame();
-            toast.info(gameState.status === 'playing' ? 'Game Paused' : 'Game Resumed');
-          }
-          break;
-        
-        case 'escape':
-          if (gameState.status === 'playing') {
-            pauseGame();
-          }
-          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [gameState.status, gameState.player.feverMeter, activateFever, pauseGame]);
+  }, [gameState.status, gameState.player.feverMeter, activateFever]);
 
   // Check for game over conditions
   useEffect(() => {
@@ -73,7 +59,7 @@ export const BananaFeverDream: React.FC = () => {
   // Secret mode activation toast
   useEffect(() => {
     if (gameState.secretMode) {
-      toast.success('🎂 PP MODE ACTIVATED! 🎂', {
+      toast.success('🎂 PPMan Mode Activated!', {
         duration: 3000,
         style: { 
           background: 'hsl(220, 80%, 60%)', 
@@ -120,14 +106,13 @@ export const BananaFeverDream: React.FC = () => {
       
       case 'ready':
       case 'playing':
-      case 'paused':
         return (
           <div className="min-h-screen bg-gradient-game flex flex-col items-center justify-start p-4">
             {/* UI above the game */}
             <div className="w-[800px] mb-4">
               <div className="grid grid-cols-[2fr_1fr_2fr] gap-4 items-stretch">
                 {/* Score and Level */}
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border min-h-[100px] flex items-center">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border min-h-[70px] flex items-center">
                   <div className="space-y-1 w-full">
                     <div className="text-2xl font-bold text-primary">
                       {gameState.player.score.toLocaleString()}
@@ -135,16 +120,11 @@ export const BananaFeverDream: React.FC = () => {
                     <div className="text-sm text-muted-foreground">
                       Level {gameState.level} • Wave {gameState.wave}
                     </div>
-                    {gameState.secretMode && (
-                      <div className="text-xs text-blue-400 font-bold animate-pulse">
-                        🎂 PPMAN MODE ACTIVE
-                      </div>
-                    )}
                   </div>
                 </div>
 
                 {/* Health */}
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border min-h-[100px] flex items-center">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border min-h-[70px] flex items-center">
                   <div className="flex flex-col items-center gap-2 w-full">
                     <span className="text-sm text-muted-foreground">Health</span>
                     <div className="flex gap-1">
@@ -163,7 +143,7 @@ export const BananaFeverDream: React.FC = () => {
                 </div>
 
                 {/* Fever Meter */}
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border min-h-[100px] flex items-center">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border min-h-[70px] flex items-center">
                   <div className="space-y-2 w-full">
                     {gameState.player.feverMeter < 100 && (
                       <>
@@ -206,15 +186,6 @@ export const BananaFeverDream: React.FC = () => {
             <div className="relative">
               <GameCanvas gameState={gameState} config={config} />
               
-              {gameState.status === 'paused' && (
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm 
-                               flex items-center justify-center">
-                  <div className="text-center space-y-4">
-                    <h2 className="text-4xl font-bold text-primary">PAUSED</h2>
-                    <p className="text-muted-foreground">Press P to resume</p>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Unified Bottom Area */}
@@ -252,9 +223,8 @@ export const BananaFeverDream: React.FC = () => {
               <div className="flex flex-col items-start gap-2">
                 <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border text-xs text-muted-foreground">
                   <div>WASD / Arrows: Move</div>
-                  <div>Space: Shoot{gameState.status === 'ready' ? ' / Start' : ''}</div>
-                  <div>F: Fever</div>
-                  <div>P: Pause</div>
+                  <div>Space: Shoot</div>
+                  <div>F: Activate Fever</div>
                 </div>
               </div>
             </div>
