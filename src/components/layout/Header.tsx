@@ -46,13 +46,18 @@ const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-12">
           {/* Logo/Brand */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-6">
             <button 
               onClick={() => window.open('https://banana-fever-dream.lovable.app/', '_self')}
               className="text-2xl font-bold text-primary-foreground cursor-pointer"
             >
               🍌 Banana Fever Dream
             </button>
+            <img 
+              src="/src/assets/poweredby-apechain.png" 
+              alt="Powered by ApeChain" 
+              className="h-4 w-auto opacity-80 hover:opacity-100 transition-opacity"
+            />
           </div>
 
           {/* Wallet Connection Section */}

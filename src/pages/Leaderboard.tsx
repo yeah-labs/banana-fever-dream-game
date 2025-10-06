@@ -56,8 +56,8 @@ const Leaderboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-game flex flex-col items-center justify-start p-4 pt-8">
-      <div className="w-full max-w-4xl space-y-6">
+    <div className="min-h-screen bg-gradient-game flex flex-col items-center justify-start p-4 pt-4">
+      <div className="w-full max-w-4xl space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
           <Button
@@ -83,16 +83,11 @@ const Leaderboard: React.FC = () => {
         </div>
 
         {/* Title */}
-        <div className="text-center space-y-2">
-          <h1 className="text-5xl font-bold text-primary">Leaderboard</h1>
-          <p className="text-lg text-muted-foreground">
-            Top players in the Banana Fever Dream
+        <div className="text-center space-y-1">
+          <h1 className="text-3xl font-bold text-primary">Leaderboard</h1>
+          <p className="text-base text-muted-foreground">
+            Top 20 players in the Banana Fever Dream
           </p>
-          {lastUpdated && (
-            <p className="text-sm text-muted-foreground">
-              Last updated: {new Date(lastUpdated).toLocaleTimeString()}
-            </p>
-          )}
         </div>
 
         {/* User's Rank Card (if on leaderboard and not in top 20) */}
@@ -132,11 +127,8 @@ const Leaderboard: React.FC = () => {
         )}
 
         {/* Leaderboard Table */}
-        <Card className="bg-card/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Top 20 Players</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="bg-card/80 backdrop-blur-sm -mt-2">
+          <CardContent className="pt-3 pb-3">
             {isLoading && leaderboard.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 Loading leaderboard...
