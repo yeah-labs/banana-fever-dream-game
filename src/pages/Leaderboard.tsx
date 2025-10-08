@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
+import { useWalletAddresses } from '@/hooks/useWalletAddresses';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,6 +13,7 @@ import { useActiveAccount } from 'thirdweb/react';
 const Leaderboard: React.FC = () => {
   const navigate = useNavigate();
   const account = useActiveAccount();
+  const { originalWalletAddress, formatAddress } = useWalletAddresses();
   const { leaderboard, isLoading, error, fetchLeaderboard, lastUpdated } = useLeaderboard();
 
   // Fetch leaderboard data when component mounts
@@ -22,14 +24,10 @@ const Leaderboard: React.FC = () => {
   // Get top 20 entries
   const top20 = leaderboard.slice(0, 20);
 
-  // Find current user's rank if they're on the leaderboard
-  const userEntry = account ? leaderboard.find(entry => 
-    entry.player.toLowerCase() === account.address.toLowerCase()
+  // Find current user's rank if they're on the leaderboard (match by original wallet)
+  const userEntry = originalWalletAddress ? leaderboard.find(entry => 
+    entry.originalWallet.toLowerCase() === originalWalletAddress.toLowerCase()
   ) : null;
-
-  const formatAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString();
@@ -100,7 +98,7 @@ const Leaderboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {getRankBadge(userEntry.rank)}
-                  <span className="font-mono">{formatAddress(userEntry.player)}</span>
+                  <span className="font-mono">{formatAddress(userEntry.originalWallet)}</span>
                 </div>
                 <span className="text-2xl font-bold text-primary">
                   {userEntry.score.toLocaleString()}
@@ -149,8 +147,8 @@ const Leaderboard: React.FC = () => {
                 </TableHeader>
                 <TableBody>
                   {top20.map((entry) => {
-                    const isCurrentUser = account && 
-                      entry.player.toLowerCase() === account.address.toLowerCase();
+                    const isCurrentUser = originalWalletAddress && 
+                      entry.originalWallet.toLowerCase() === originalWalletAddress.toLowerCase();
                     
                     return (
                       <TableRow 
@@ -165,7 +163,7 @@ const Leaderboard: React.FC = () => {
                         </TableCell>
                         <TableCell className="font-mono">
                           <div className="flex items-center gap-2">
-                            {formatAddress(entry.player)}
+                            {formatAddress(entry.originalWallet)}
                             {isCurrentUser && (
                               <Badge variant="secondary" className="text-xs">You</Badge>
                             )}

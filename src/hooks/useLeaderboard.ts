@@ -3,11 +3,15 @@ import { useActiveAccount } from 'thirdweb/react';
 import { prepareContractCall, readContract, getContract, sendAndConfirmTransaction } from 'thirdweb';
 import { LeaderboardEntry, LeaderboardState } from '@/types/leaderboard';
 import { client, curtis, LEADERBOARD_CONTRACT_ADDRESS } from '@/lib/thirdweb';
+import { useWalletAddresses } from './useWalletAddresses';
 
 // Contract ABI (only the functions we need)
 const CONTRACT_ABI = [
   {
-    "inputs": [{"internalType": "uint256", "name": "_score", "type": "uint256"}],
+    "inputs": [
+      {"internalType": "uint256", "name": "_score", "type": "uint256"},
+      {"internalType": "address", "name": "_originalWallet", "type": "address"}
+    ],
     "name": "submitScore",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -18,6 +22,7 @@ const CONTRACT_ABI = [
     "name": "getAllScores",
     "outputs": [
       {"internalType": "address[]", "name": "_players", "type": "address[]"},
+      {"internalType": "address[]", "name": "_originalWallets", "type": "address[]"},
       {"internalType": "uint256[]", "name": "_scores", "type": "uint256[]"},
       {"internalType": "uint256[]", "name": "_timestamps", "type": "uint256[]"}
     ],
@@ -38,8 +43,10 @@ const CONTRACT_ABI = [
     "anonymous": false,
     "inputs": [
       {"indexed": true, "internalType": "address", "name": "player", "type": "address"},
+      {"indexed": true, "internalType": "address", "name": "originalWallet", "type": "address"},
       {"indexed": false, "internalType": "uint256", "name": "score", "type": "uint256"},
-      {"indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256"}
+      {"indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256"},
+      {"indexed": false, "internalType": "uint256", "name": "entryId", "type": "uint256"}
     ],
     "name": "ScoreSubmitted",
     "type": "event"
@@ -48,6 +55,7 @@ const CONTRACT_ABI = [
 
 export const useLeaderboard = () => {
   const account = useActiveAccount();
+  const { originalWalletAddress } = useWalletAddresses();
   
   const [leaderboardState, setLeaderboardState] = useState<LeaderboardState>({
     entries: [],
@@ -81,12 +89,14 @@ export const useLeaderboard = () => {
       });
 
       const players = result[0] as string[];
-      const scores = result[1] as bigint[];
-      const timestamps = result[2] as bigint[];
+      const originalWallets = result[1] as string[];
+      const scores = result[2] as bigint[];
+      const timestamps = result[3] as bigint[];
 
       // Convert to LeaderboardEntry array
       const entries: LeaderboardEntry[] = players.map((player, index) => ({
         player,
+        originalWallet: originalWallets[index],
         score: Number(scores[index]),
         timestamp: Number(timestamps[index]),
       }));
@@ -124,6 +134,11 @@ export const useLeaderboard = () => {
       return false;
     }
 
+    if (!originalWalletAddress) {
+      console.error('No original wallet address found');
+      return false;
+    }
+
     if (score <= 0) {
       console.error('Invalid score');
       return false;
@@ -132,11 +147,11 @@ export const useLeaderboard = () => {
     setIsSubmitting(true);
 
     try {
-      // Prepare the transaction
+      // Prepare the transaction with originalWallet parameter
       const transaction = prepareContractCall({
         contract,
         method: "submitScore",
-        params: [BigInt(score)],
+        params: [BigInt(score), originalWalletAddress as `0x${string}`],
       });
 
       // Send transaction with gas sponsorship
@@ -159,7 +174,7 @@ export const useLeaderboard = () => {
       setIsSubmitting(false);
       return false;
     }
-  }, [account, contract, fetchLeaderboard]);
+  }, [account, originalWalletAddress, contract, fetchLeaderboard]);
 
   /**
    * Get a specific player's score

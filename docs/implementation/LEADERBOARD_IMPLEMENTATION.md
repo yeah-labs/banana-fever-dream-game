@@ -5,21 +5,23 @@
 ### 1. Smart Contract (`/contracts/BananaLeaderboard.sol`)
 - **Solidity 0.8.20** smart contract for on-chain score storage
 - **Features:**
-  - Stores best score per wallet address
-  - On-chain validation: score > 0, must beat previous best
+  - Stores all scores with wallet addresses (smart wallet + original wallet)
+  - On-chain validation: score > 0
   - Events emitted for score submissions
-  - Gas-efficient design (only stores best scores)
+  - Tracks original wallet addresses for consistent user identification
   - Extensible struct for future enhancements
   - Off-chain sorting support via `getAllScores()`
 
 ### 2. TypeScript Types (`/src/types/leaderboard.ts`)
-- `LeaderboardEntry` interface
+- `LeaderboardEntry` interface (includes originalWallet field)
 - `LeaderboardState` interface for state management
 
-### 3. React Hook (`/src/hooks/useLeaderboard.ts`)
+### 3. React Hooks
+
+#### `useLeaderboard.ts`
 - **ThirdWeb Integration** for Web3 interactions
 - **Functions:**
-  - `submitScore(score)` - Submit score to blockchain
+  - `submitScore(score)` - Submit score to blockchain with original wallet address
   - `fetchLeaderboard()` - Fetch and sort all scores
   - `getPlayerScore(address)` - Get specific player's score
 - **State Management:**
@@ -28,24 +30,40 @@
   - `error` - Error messages
   - `isConnected` - Wallet connection status
 
+#### `useWalletAddresses.ts` (New)
+- **Centralized wallet address management**
+- **Returns:**
+  - `originalWalletAddress` - The original EOA wallet address
+  - `formattedOriginalAddress` - Formatted original address (0x1234...5678)
+  - `isConnected` - Connection status
+  - `formatAddress()` - Utility function for formatting addresses
+- **Purpose:** Provides original wallet address for users with smart wallets, ensuring consistent user identification across the app
+
 ### 4. Leaderboard Page (`/src/pages/Leaderboard.tsx`)
 - **Full-screen route at `/leaderboard`**
 - **Features:**
   - Top 20 player display with beautiful UI
+  - **Displays original wallet addresses** (not smart wallet addresses)
   - Rank badges (gold/silver/bronze for top 3)
-  - User's rank highlighted if on leaderboard
+  - User's rank highlighted if on leaderboard (matched by original wallet)
   - Shows user's rank even if outside top 20
   - Real-time refresh button
   - Connection status alerts
   - Responsive design
 
-### 5. Game Integration
+### 5. Header Component (`/src/components/layout/Header.tsx`)
+- **Displays original wallet address** for consistent user identification
+- Shows the address of the original EOA wallet (for smart wallet users)
+- Seamlessly works with both smart wallets and regular wallets
+
+### 6. Game Integration
 
 #### BananaFeverDream Component
 - Added "LEADERBOARD" button that navigates to `/leaderboard`
 
 #### GameOver Component
 - **Auto-submit scores** when game ends (if wallet connected)
+- **Submits with original wallet address** for consistent identification
 - **Status indicators:**
   - Warning if wallet not connected
   - Loading state during submission
@@ -53,7 +71,7 @@
 - **Toast notifications** with direct link to leaderboard
 - Added "LEADERBOARD" button to view rankings
 
-### 6. Routing (`/src/App.tsx`)
+### 7. Routing (`/src/App.tsx`)
 - Added `/leaderboard` route
 - Imported Leaderboard page component
 
@@ -131,22 +149,47 @@ Test the flow:
 ### Smart Contract Storage
 ```solidity
 struct ScoreEntry {
-    address player;
+    address player;           // Smart wallet address
+    address originalWallet;   // Original EOA wallet address
     uint256 score;
     uint256 timestamp;
-    bool exists;
+    uint256 entryId;
 }
 ```
 
 ### Frontend State
 ```typescript
 interface LeaderboardEntry {
-    player: string;      // Wallet address
-    score: number;       // Final score
-    timestamp: number;   // When achieved
-    rank?: number;       // Position (1-based)
+    player: string;          // Smart wallet address
+    originalWallet: string;  // Original EOA wallet address (displayed in UI)
+    score: number;           // Final score
+    timestamp: number;       // When achieved
+    rank?: number;           // Position (1-based)
 }
 ```
+
+## 🔑 Original Wallet Tracking
+
+### Why Track Original Wallets?
+
+When users connect with smart wallets (Account Abstraction), they have two addresses:
+1. **Smart Wallet Address** - Changes between sessions/devices
+2. **Original Wallet Address** - Consistent EOA (like MetaMask address)
+
+The leaderboard displays the **original wallet address** to provide:
+- ✅ Consistent user identification across sessions
+- ✅ Recognizable addresses for users
+- ✅ Proper "You" badge highlighting
+- ✅ Better UX for players with smart wallets
+
+### How It Works
+
+1. User connects wallet (MetaMask, in-app wallet, etc.)
+2. `useWalletAddresses` hook detects if it's a smart wallet
+3. If smart wallet: extracts original wallet via `useAdminWallet()`
+4. If regular wallet: uses the account address directly
+5. Original wallet address is submitted with each score
+6. UI displays only the original wallet address throughout the app
 
 ## 🎨 UI/UX Features
 

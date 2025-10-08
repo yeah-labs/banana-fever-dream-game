@@ -70,6 +70,7 @@ This project is built with:
 - **Gas-free leaderboard** - Submit scores without paying gas fees
 - **Web3 integration** - Connect with MetaMask and other wallets
 - **Smart accounts** - Automatic account abstraction for seamless UX
+- **Original wallet tracking** - Consistent user identification across smart and regular wallets
 
 ## ThirdWeb Integration
 

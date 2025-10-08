@@ -1,5 +1,6 @@
 export interface LeaderboardEntry {
-  player: string; // Wallet address
+  player: string; // Smart wallet address
+  originalWallet: string; // Original wallet address (EOA)
   score: number;
   timestamp: number;
   rank?: number;

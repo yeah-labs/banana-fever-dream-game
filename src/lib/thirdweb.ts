@@ -18,7 +18,7 @@ export const curtis = defineChain({
 });
 
 // Leaderboard contract address
-export const LEADERBOARD_CONTRACT_ADDRESS = import.meta.env.VITE_LEADERBOARD_CONTRACT_ADDRESS || "0xc2b0fd0536590ef616f361e3a4f6ff15a8e36c51";
+export const LEADERBOARD_CONTRACT_ADDRESS = import.meta.env.VITE_LEADERBOARD_CONTRACT_ADDRESS || "0x9e6921bc255b66ba779cca638049b8cd6fc29070";
 
 // Account Factory address for smart accounts
 export const ACCOUNT_FACTORY_ADDRESS = import.meta.env.VITE_ACCOUNT_FACTORY_ADDRESS || "0x1b853d955330c72c964bb33d624248ff213d9335";

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, User } from 'lucide-react';
 import { client, curtis, ACCOUNT_FACTORY_ADDRESS } from '@/lib/thirdweb';
+import { useWalletAddresses } from '@/hooks/useWalletAddresses';
 import apechainLogo from '@/assets/poweredby-apechain.png';
 
 const wallets = [
@@ -31,10 +32,7 @@ const Header: React.FC = () => {
   const account = useActiveAccount();
   const wallet = useActiveWallet();
   const { disconnect } = useDisconnect();
-
-  const formatAddress = (addr: string) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-  };
+  const { formattedOriginalAddress, isConnected } = useWalletAddresses();
 
   const handleDisconnect = () => {
     if (wallet) {
@@ -63,12 +61,12 @@ const Header: React.FC = () => {
 
           {/* Wallet Connection Section */}
           <div className="flex items-center space-x-4">
-            {account ? (
+            {isConnected && account ? (
               <div className="flex items-center space-x-3">
-                {/* Connected Wallet Address */}
+                {/* Original Wallet Address */}
                 <Badge variant="secondary" className="bg-card/20 text-primary-foreground border-border hover:bg-card/20">
                   <User className="w-4 h-4 mr-2" />
-                  {formatAddress(account.address)}
+                  {formattedOriginalAddress}
                 </Badge>
                 
                 {/* Disconnect Button */}

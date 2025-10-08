@@ -12,6 +12,7 @@ Welcome to the Banana Fever Dream game documentation! This folder contains all t
 ### Implementation Details
 - **[Leaderboard Implementation](implementation/LEADERBOARD_IMPLEMENTATION.md)** - Technical details of the leaderboard system
 - **[Leaderboard Deployment](implementation/LEADERBOARD_DEPLOYMENT.md)** - Step-by-step deployment instructions
+- **[Original Wallet Tracking](implementation/ORIGINAL_WALLET_TRACKING.md)** - How we track and display original wallet addresses
 - **[Changes Summary](implementation/CHANGES_SUMMARY.md)** - Summary of all changes made during development
 
 ## 🚀 Quick Start
@@ -26,6 +27,7 @@ Welcome to the Banana Fever Dream game documentation! This folder contains all t
 - **Gas-free leaderboard** - Submit scores without paying gas fees
 - **Web3 integration** - Connect with MetaMask and other wallets
 - **Smart accounts** - Automatic account abstraction for seamless UX
+- **Original wallet tracking** - Consistent user identification across sessions
 
 ## 🔧 Technical Stack
 
