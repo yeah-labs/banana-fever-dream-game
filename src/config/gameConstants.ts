@@ -28,20 +28,20 @@ export const GAME_CONSTANTS = {
     SPAWN_RATE: 800,
     NORMAL: {
       WIDTH: 30,
-      HEIGHT: 30,
+      HEIGHT: 31,
       HEALTH: 1,
       POINTS: 100,
     },
     MINI_BOSS: {
       WIDTH: 50,
-      HEIGHT: 50,
+      HEIGHT: 45,
       BASE_HEALTH: 3,
       BASE_POINTS: 300,
       SPEED_MULTIPLIER: 0.8,
     },
     BOSS: {
       WIDTH: 80,
-      HEIGHT: 80,
+      HEIGHT: 65,
       BASE_HEALTH: 8,
       BASE_POINTS: 1000,
       SPEED_MULTIPLIER: 0.6,

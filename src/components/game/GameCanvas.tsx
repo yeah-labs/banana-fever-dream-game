@@ -1,6 +1,17 @@
 import React, { useRef, useEffect, useState, memo } from 'react';
 import { GameState, GameConfig } from '@/types/game';
 import playerMonkeyImage from '@/assets/player-monkey.png';
+import enemyNormalImage from '@/assets/enemy-normal.png';
+import enemyNormalBlackImage from '@/assets/enemy-normal-black.png';
+import enemyPPManImage from '@/assets/enemy-ppman.png';
+import enemyMiniBossImage from '@/assets/enemy-mini-boss.png';
+import enemyBossImage from '@/assets/enemy-boss.png';
+import powerUpSpreadShotImage from '@/assets/powerup-spread-shot.png';
+import powerUpShieldImage from '@/assets/powerup-shield.png';
+import powerUpScoreDoublerImage from '@/assets/powerup-score-doubler.png';
+import powerUpMagnetImage from '@/assets/powerup-magnet.png';
+import powerUpSwordImage from '@/assets/powerup-sword.png';
+import powerUpRealityWarpImage from '@/assets/powerup-reality-warp.png';
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -10,12 +21,77 @@ interface GameCanvasProps {
 export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [playerImage, setPlayerImage] = useState<HTMLImageElement | null>(null);
+  const [enemyImages, setEnemyImages] = useState<{
+    normal: HTMLImageElement | null;
+    normalBlack: HTMLImageElement | null;
+    ppman: HTMLImageElement | null;
+    miniBoss: HTMLImageElement | null;
+    boss: HTMLImageElement | null;
+  }>({ normal: null, normalBlack: null, ppman: null, miniBoss: null, boss: null });
+  const [powerUpImages, setPowerUpImages] = useState<{
+    spreadShot: HTMLImageElement | null;
+    shield: HTMLImageElement | null;
+    scoreDoubler: HTMLImageElement | null;
+    magnet: HTMLImageElement | null;
+    sword: HTMLImageElement | null;
+    realityWarp: HTMLImageElement | null;
+  }>({ spreadShot: null, shield: null, scoreDoubler: null, magnet: null, sword: null, realityWarp: null });
 
   // Load player image
   useEffect(() => {
     const img = new Image();
     img.onload = () => setPlayerImage(img);
     img.src = playerMonkeyImage;
+  }, []);
+
+  // Load enemy images
+  useEffect(() => {
+    const normalImg = new Image();
+    normalImg.onload = () => setEnemyImages(prev => ({ ...prev, normal: normalImg }));
+    normalImg.src = enemyNormalImage;
+
+    const normalBlackImg = new Image();
+    normalBlackImg.onload = () => setEnemyImages(prev => ({ ...prev, normalBlack: normalBlackImg }));
+    normalBlackImg.src = enemyNormalBlackImage;
+
+    const ppmanImg = new Image();
+    ppmanImg.onload = () => setEnemyImages(prev => ({ ...prev, ppman: ppmanImg }));
+    ppmanImg.src = enemyPPManImage;
+
+    const miniBossImg = new Image();
+    miniBossImg.onload = () => setEnemyImages(prev => ({ ...prev, miniBoss: miniBossImg }));
+    miniBossImg.src = enemyMiniBossImage;
+
+    const bossImg = new Image();
+    bossImg.onload = () => setEnemyImages(prev => ({ ...prev, boss: bossImg }));
+    bossImg.src = enemyBossImage;
+  }, []);
+
+  // Load power-up images
+  useEffect(() => {
+    const spreadShotImg = new Image();
+    spreadShotImg.onload = () => setPowerUpImages(prev => ({ ...prev, spreadShot: spreadShotImg }));
+    spreadShotImg.src = powerUpSpreadShotImage;
+
+    const shieldImg = new Image();
+    shieldImg.onload = () => setPowerUpImages(prev => ({ ...prev, shield: shieldImg }));
+    shieldImg.src = powerUpShieldImage;
+
+    const scoreDoublerImg = new Image();
+    scoreDoublerImg.onload = () => setPowerUpImages(prev => ({ ...prev, scoreDoubler: scoreDoublerImg }));
+    scoreDoublerImg.src = powerUpScoreDoublerImage;
+
+    const magnetImg = new Image();
+    magnetImg.onload = () => setPowerUpImages(prev => ({ ...prev, magnet: magnetImg }));
+    magnetImg.src = powerUpMagnetImage;
+
+    const swordImg = new Image();
+    swordImg.onload = () => setPowerUpImages(prev => ({ ...prev, sword: swordImg }));
+    swordImg.src = powerUpSwordImage;
+
+    const realityWarpImg = new Image();
+    realityWarpImg.onload = () => setPowerUpImages(prev => ({ ...prev, realityWarp: realityWarpImg }));
+    realityWarpImg.src = powerUpRealityWarpImage;
   }, []);
 
   useEffect(() => {
@@ -77,44 +153,34 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
 
     // Draw enemies
     gameState.enemies.forEach(enemy => {
-      const color = gameState.secretMode ? 
-        'hsl(220, 70%, 50%)' : // Blue for easter egg mode
-        enemy.type === 'boss' ? 'hsl(350, 80%, 40%)' :
-        enemy.type === 'mini-boss' ? 'hsl(15, 70%, 45%)' :
-        'hsl(0, 80%, 55%)';
+      // Select appropriate image based on enemy type
+      let enemyImage: HTMLImageElement | null = null;
+      if (enemy.type === 'boss' && enemyImages.boss) {
+        enemyImage = enemyImages.boss;
+      } else if (enemy.type === 'mini-boss' && enemyImages.miniBoss) {
+        enemyImage = enemyImages.miniBoss;
+      } else if (enemy.type === 'normal') {
+        // In secret mode, use PPMan image for all normal enemies
+        if (gameState.secretMode && enemyImages.ppman) {
+          enemyImage = enemyImages.ppman;
+        } else {
+          // Randomly select between normal variants based on enemy ID for consistency
+          // Use timestamp portion of ID to get proper randomization even with single spawns
+          const idHash = parseInt(enemy.id.split('-')[1], 10) || 0;
+          const variant = idHash % 2;
+          enemyImage = variant === 0 ? enemyImages.normal : enemyImages.normalBlack;
+        }
+      }
 
-      ctx.fillStyle = color;
-      
-      // Draw enemy based on type
-      if (enemy.type === 'boss') {
-        // Large boss enemy
-        ctx.fillRect(
+      // Draw enemy image if loaded
+      if (enemyImage) {
+        ctx.drawImage(
+          enemyImage,
           enemy.position.x,
           enemy.position.y,
           enemy.width,
           enemy.height
         );
-        // Add threatening glow
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 15;
-        ctx.fillRect(
-          enemy.position.x,
-          enemy.position.y,
-          enemy.width,
-          enemy.height
-        );
-        ctx.shadowBlur = 0;
-      } else {
-        // Regular/mini-boss enemies - circular
-        ctx.beginPath();
-        ctx.arc(
-          enemy.position.x + enemy.width / 2,
-          enemy.position.y + enemy.height / 2,
-          enemy.width / 2,
-          0,
-          Math.PI * 2
-        );
-        ctx.fill();
       }
     });
 
@@ -147,127 +213,40 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, config }) => 
 
     // Draw power-ups
     gameState.powerUps.forEach(powerUp => {
-      const rarityColors = {
-        common: 'hsl(0, 0%, 60%)',       // Gray
-        uncommon: 'hsl(120, 60%, 50%)',  // Green
-        rare: 'hsl(220, 70%, 60%)',      // Blue
-        epic: 'hsl(280, 70%, 60%)',      // Purple
-        legendary: 'hsl(45, 80%, 55%)'   // Gold
-      };
-
-      ctx.fillStyle = rarityColors[powerUp.rarity];
+      // Select appropriate image based on power-up type
+      let powerUpImage: HTMLImageElement | null = null;
       
-      // Draw different shapes based on power-up type
-      if (powerUp.type === 'spread-shot') {
-        // Three small circles for spread shot
-        const radius = powerUp.width / 6;
-        for (let i = 0; i < 3; i++) {
-          ctx.beginPath();
-          ctx.arc(
-            powerUp.position.x + powerUp.width / 2 + (i - 1) * radius * 2,
-            powerUp.position.y + powerUp.height / 2,
-            radius,
-            0,
-            Math.PI * 2
-          );
-          ctx.fill();
-        }
-      } else if (powerUp.type === 'shield') {
-        // Pentagon shape for shield
-        ctx.beginPath();
-        const centerX = powerUp.position.x + powerUp.width / 2;
-        const centerY = powerUp.position.y + powerUp.height / 2;
-        const radius = powerUp.width / 2;
-        for (let i = 0; i < 5; i++) {
-          const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
-          const x = centerX + radius * Math.cos(angle);
-          const y = centerY + radius * Math.sin(angle);
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.closePath();
-        ctx.fill();
-      } else if (powerUp.type === 'score-doubler') {
-        // Draw "X" text for score doubler
-        const centerX = powerUp.position.x + powerUp.width / 2;
-        const centerY = powerUp.position.y + powerUp.height / 2;
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        // Fill with power-up color
-        ctx.fillStyle = rarityColors[powerUp.rarity];
-        ctx.fillText('X', centerX, centerY);
-        
-        // Reset text properties
-        ctx.textAlign = 'start';
-        ctx.textBaseline = 'alphabetic';
-      } else if (powerUp.type === 'magnet') {
-        // Two vertical lines for magnet poles
-        const centerX = powerUp.position.x + powerUp.width / 2;
-        const centerY = powerUp.position.y + powerUp.height / 2;
-        ctx.strokeStyle = rarityColors[powerUp.rarity];
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        
-        // Left pole
-        ctx.beginPath();
-        ctx.moveTo(centerX - 4, centerY - 6);
-        ctx.lineTo(centerX - 4, centerY + 6);
-        ctx.stroke();
-        
-        // Right pole
-        ctx.beginPath();
-        ctx.moveTo(centerX + 4, centerY - 6);
-        ctx.lineTo(centerX + 4, centerY + 6);
-        ctx.stroke();
-        
-        // Reset line properties
-        ctx.lineWidth = 1;
-        ctx.lineCap = 'butt';
-      } else if (powerUp.type === 'sword') {
-        // Three horizontal rectangles for sword
-        const centerX = powerUp.position.x + powerUp.width / 2;
-        const centerY = powerUp.position.y + powerUp.height / 2;
-        const rectWidth = 4;
-        const rectHeight = 8;
-        const spacing = 6;
-        
-        ctx.fillStyle = rarityColors[powerUp.rarity];
-        
-        // Left sword
-        ctx.fillRect(centerX - spacing - rectWidth/2, centerY - rectHeight/2, rectWidth, rectHeight);
-        // Center sword
-        ctx.fillRect(centerX - rectWidth/2, centerY - rectHeight/2, rectWidth, rectHeight);
-        // Right sword
-        ctx.fillRect(centerX + spacing - rectWidth/2, centerY - rectHeight/2, rectWidth, rectHeight);
-      } else if (powerUp.type === 'reality-warp') {
-        // Tilted pill shape for reality warp
-        const centerX = powerUp.position.x + powerUp.width / 2;
-        const centerY = powerUp.position.y + powerUp.height / 2;
-        const pillWidth = powerUp.width * 1.2;
-        const pillHeight = powerUp.height * 0.7;
-        
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(Math.PI / 4); // 45 degrees
-        
-        // Draw pill (rounded rectangle)
-        ctx.beginPath();
-        ctx.roundRect(-pillWidth/2, -pillHeight/2, pillWidth, pillHeight, pillHeight/2);
-        ctx.fill();
-        
-        ctx.restore();
-      } else {
-        // Default: rectangle for other types
-        ctx.fillRect(
+      switch (powerUp.type) {
+        case 'spread-shot':
+          powerUpImage = powerUpImages.spreadShot;
+          break;
+        case 'shield':
+          powerUpImage = powerUpImages.shield;
+          break;
+        case 'score-doubler':
+          powerUpImage = powerUpImages.scoreDoubler;
+          break;
+        case 'magnet':
+          powerUpImage = powerUpImages.magnet;
+          break;
+        case 'sword':
+          powerUpImage = powerUpImages.sword;
+          break;
+        case 'reality-warp':
+          powerUpImage = powerUpImages.realityWarp;
+          break;
+      }
+
+      // Draw power-up image if loaded
+      if (powerUpImage) {
+        ctx.drawImage(
+          powerUpImage,
           powerUp.position.x,
           powerUp.position.y,
           powerUp.width,
           powerUp.height
         );
       }
-
     });
 
     // Reset all transforms and filters

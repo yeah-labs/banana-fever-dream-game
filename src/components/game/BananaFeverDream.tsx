@@ -84,6 +84,10 @@ export const BananaFeverDream: React.FC = () => {
     navigate('/leaderboard');
   };
 
+  const handleInfoClick = () => {
+    navigate('/info');
+  };
+
   const renderCurrentScreen = () => {
     switch (gameState.status) {
       case 'game-over':
@@ -199,6 +203,14 @@ export const BananaFeverDream: React.FC = () => {
                   onClick={handleLeaderboardClick}
                 >
                   LEADERBOARD
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-primary hover:bg-primary/10"
+                  onClick={handleInfoClick}
+                >
+                  INFO
                 </Button>
                 <Button
                   variant="outline"

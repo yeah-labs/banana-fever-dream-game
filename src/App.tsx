@@ -8,6 +8,7 @@ import { ThirdwebProvider } from "thirdweb/react";
 import Header from "@/components/layout/Header";
 import Index from "./pages/Index";
 import Leaderboard from "./pages/Leaderboard";
+import Info from "./pages/Info";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/leaderboard" element={<Leaderboard />} />
+                  <Route path="/info" element={<Info />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
