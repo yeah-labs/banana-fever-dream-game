@@ -2,7 +2,7 @@
 
 ## ✅ What Has Been Implemented
 
-### 1. Smart Contract (`/contracts/BananaLeaderboard.sol`)
+### 1. Smart Contract (`/contracts/Leaderboard.sol`)
 - **Solidity 0.8.20** smart contract for on-chain score storage
 - **Features:**
   - Stores all scores with wallet addresses (smart wallet + original wallet)
@@ -82,7 +82,7 @@ See `LEADERBOARD_DEPLOYMENT.md` for detailed instructions.
 
 **Quick Start:**
 1. Go to [Remix IDE](https://remix.ethereum.org/)
-2. Create new file and paste `/contracts/BananaLeaderboard.sol`
+2. Create new file and paste `/contracts/Leaderboard.sol`
 3. Compile with Solidity 0.8.20+
 4. Deploy to ApeChain Curtis Testnet (Chain ID: 33111)
 5. Copy deployed contract address
@@ -99,7 +99,7 @@ npm run dev
 ```
 
 Test the flow:
-1. Connect wallet
+1. Log in
 2. Play game
 3. Check score auto-submission on game over
 4. Navigate to `/leaderboard`
@@ -118,9 +118,9 @@ Test the flow:
 5. Leaderboard shows user's rank and top 20
 
 ### For Guest Users:
-1. User plays without connecting wallet
+1. User plays without logging in
 2. On game over:
-   - Warning message: "Connect wallet to save scores"
+   - Warning message: "Log in and insert a coin to compete"
 3. User can still view leaderboard
 4. Leaderboard shows top 20 with connection prompt
 

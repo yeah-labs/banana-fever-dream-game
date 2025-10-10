@@ -18,7 +18,10 @@ export const curtis = defineChain({
 });
 
 // Leaderboard contract address
-export const LEADERBOARD_CONTRACT_ADDRESS = import.meta.env.VITE_LEADERBOARD_CONTRACT_ADDRESS || "0x9e6921bc255b66ba779cca638049b8cd6fc29070";
+export const LEADERBOARD_CONTRACT_ADDRESS = import.meta.env.VITE_LEADERBOARD_CONTRACT_ADDRESS || "0x1a184ce89ce282c23abc38e9f2d010ce740393cb";
+
+// CoinSlot contract address
+export const COINSLOT_CONTRACT_ADDRESS = import.meta.env.VITE_COINSLOT_CONTRACT_ADDRESS || "0x871103bae46a7fc99ba11f1312b4cadd44cda3b8";
 
 // Account Factory address for smart accounts
 export const ACCOUNT_FACTORY_ADDRESS = import.meta.env.VITE_ACCOUNT_FACTORY_ADDRESS || "0x1b853d955330c72c964bb33d624248ff213d9335";

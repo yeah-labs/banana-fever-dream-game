@@ -1,12 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+// Interface for CoinSlot contract
+interface ICoinSlot {
+    function hasActivePayment(address _player) external view returns (bool);
+    function clearPayment(address _player) external;
+}
+
 /**
- * @title BananaLeaderboard
+ * @title Leaderboard
  * @dev Simple leaderboard contract for Banana Fever Dream game
  * Stores all scores for each player address with basic validation
+ * Only accepts scores from players who have paid via CoinSlot contract
  */
-contract BananaLeaderboard {
+contract Leaderboard {
+    // Owner of the contract
+    address public owner;
+    
+    // CoinSlot contract address
+    address public coinSlotAddress;
+    
     // Struct to store player score data
     struct ScoreEntry {
         address player;
@@ -24,6 +37,24 @@ contract BananaLeaderboard {
     
     // Events
     event ScoreSubmitted(address indexed player, address indexed originalWallet, uint256 score, uint256 timestamp, uint256 entryId);
+    event CoinSlotAddressUpdated(address indexed newAddress, uint256 timestamp);
+    
+    // Modifiers
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call this function");
+        _;
+    }
+    
+    modifier onlyPaidPlayers(address _originalWallet) {
+        require(coinSlotAddress != address(0), "CoinSlot address not set");
+        ICoinSlot coinSlot = ICoinSlot(coinSlotAddress);
+        require(coinSlot.hasActivePayment(_originalWallet), "Original wallet must pay to submit score");
+        _;
+    }
+    
+    constructor() {
+        owner = msg.sender;
+    }
     
     /**
      * @dev Submit a score to the leaderboard
@@ -32,8 +63,10 @@ contract BananaLeaderboard {
      * Requirements:
      * - Score must be greater than 0
      * - Original wallet address must not be zero address
+     * - Original wallet must have paid via CoinSlot contract
+     * Note: msg.sender can be smart account, but _originalWallet must have paid
      */
-    function submitScore(uint256 _score, address _originalWallet) external {
+    function submitScore(uint256 _score, address _originalWallet) external onlyPaidPlayers(_originalWallet) {
         require(_score > 0, "Score must be greater than 0");
         require(_originalWallet != address(0), "Original wallet cannot be zero address");
         
@@ -50,6 +83,10 @@ contract BananaLeaderboard {
         emit ScoreSubmitted(msg.sender, _originalWallet, _score, block.timestamp, nextEntryId);
         
         nextEntryId++;
+        
+        // Clear the payment for the original wallet (not the smart account)
+        ICoinSlot coinSlot = ICoinSlot(coinSlotAddress);
+        coinSlot.clearPayment(_originalWallet);
     }
     
     /**
@@ -152,4 +189,25 @@ contract BananaLeaderboard {
         ScoreEntry memory entry = allScores[_index];
         return (entry.player, entry.originalWallet, entry.score, entry.timestamp, entry.entryId);
     }
+    
+    /**
+     * @dev Set or update the CoinSlot contract address
+     * @param _coinSlotAddress Address of the CoinSlot contract
+     * Only owner can call this function
+     */
+    function setCoinSlotAddress(address _coinSlotAddress) external onlyOwner {
+        require(_coinSlotAddress != address(0), "CoinSlot address cannot be zero address");
+        coinSlotAddress = _coinSlotAddress;
+        emit CoinSlotAddressUpdated(_coinSlotAddress, block.timestamp);
+    }
+    
+    /**
+     * @dev Transfer ownership to a new address
+     * @param newOwner Address of the new owner
+     */
+    function transferOwnership(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "New owner cannot be zero address");
+        owner = newOwner;
+    }
 }
+

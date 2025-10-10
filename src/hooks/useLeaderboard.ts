@@ -127,8 +127,10 @@ export const useLeaderboard = () => {
 
   /**
    * Submit a score to the leaderboard with gas sponsorship
+   * Note: Only submit if the player paid to play (compete mode)
+   * The contract will verify payment status via CoinSlot contract
    */
-  const submitScore = useCallback(async (score: number): Promise<boolean> => {
+  const submitScore = useCallback(async (score: number, playMode?: string): Promise<boolean> => {
     if (!account) {
       console.error('No wallet connected');
       return false;
@@ -141,6 +143,12 @@ export const useLeaderboard = () => {
 
     if (score <= 0) {
       console.error('Invalid score');
+      return false;
+    }
+
+    // Only submit scores from compete mode
+    if (playMode && playMode !== 'compete') {
+      console.log('Score not submitted: Only compete mode scores are saved to leaderboard');
       return false;
     }
 

@@ -27,12 +27,12 @@ export const GameOver: React.FC<GameOverProps> = ({
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [userCancelled, setUserCancelled] = useState(false);
 
-  // Auto-submit score when game ends if wallet is connected
+  // Auto-submit score when game ends if user is logged in and in compete mode
   useEffect(() => {
     const submitGameScore = async () => {
-      if (isConnected && player.score > 0 && !hasSubmitted && !userCancelled) {
+      if (isConnected && player.score > 0 && !hasSubmitted && !userCancelled && gameState.playMode === 'compete') {
         setHasSubmitted(true);
-        const success = await submitScore(player.score);
+        const success = await submitScore(player.score, gameState.playMode);
         if (!success) {
           // User cancelled or transaction failed - honor their choice
           setUserCancelled(true);
@@ -42,7 +42,7 @@ export const GameOver: React.FC<GameOverProps> = ({
     };
 
     submitGameScore();
-  }, [isConnected, player.score, hasSubmitted, userCancelled, submitScore]);
+  }, [isConnected, player.score, hasSubmitted, userCancelled, submitScore, gameState.playMode]);
 
   return (
     <div className="min-h-screen bg-gradient-game flex justify-center p-4 pt-8">
@@ -56,16 +56,24 @@ export const GameOver: React.FC<GameOverProps> = ({
             The Pith have overtaken the swamp... for now.
           </p>
           
-          {/* Connection Status */}
+          {/* Login Status */}
           {!isConnected && (
             <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3">
               <p className="text-sm text-yellow-200">
-                💡 Connect your wallet to save your scores to the leaderboard!
+                💡 Log in and insert a coin to compete
               </p>
             </div>
           )}
           
-          {isConnected && isSubmitting && (
+          {isConnected && gameState.playMode === 'practice' && (
+            <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3">
+              <p className="text-sm text-yellow-200">
+                💡 Insert a coin to compete
+              </p>
+            </div>
+          )}
+          
+          {isConnected && gameState.playMode === 'compete' && isSubmitting && (
             <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-3">
               <p className="text-sm text-blue-200">
                 Submitting your score to ApeChain...
@@ -73,7 +81,7 @@ export const GameOver: React.FC<GameOverProps> = ({
             </div>
           )}
           
-          {isConnected && hasSubmitted && !isSubmitting && (
+          {isConnected && gameState.playMode === 'compete' && hasSubmitted && !isSubmitting && (
             <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-3">
               <p className="text-sm text-green-200">
                 ✅ Score submitted successfully!
@@ -81,7 +89,7 @@ export const GameOver: React.FC<GameOverProps> = ({
             </div>
           )}
           
-          {isConnected && userCancelled && !isSubmitting && (
+          {isConnected && gameState.playMode === 'compete' && userCancelled && !isSubmitting && (
             <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3">
               <p className="text-sm text-yellow-200">
                 ⚠️ Score submission cancelled. Your score was not saved to the leaderboard.

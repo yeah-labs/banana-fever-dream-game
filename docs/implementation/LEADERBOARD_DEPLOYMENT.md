@@ -10,8 +10,8 @@
 ### Option A: Using Remix IDE (Recommended for simplicity)
 
 1. Go to [Remix IDE](https://remix.ethereum.org/)
-2. Create a new file `BananaLeaderboard.sol`
-3. Copy the contract code from `/contracts/BananaLeaderboard.sol`
+2. Create a new file `Leaderboard.sol`
+3. Copy the contract code from `/contracts/Leaderboard.sol`
 4. Compile the contract (Solidity 0.8.20+)
 5. Deploy:
    - Select "Injected Provider - MetaMask" in Environment
@@ -28,12 +28,12 @@ forge init leaderboard-contract
 cd leaderboard-contract
 
 # Copy contract
-cp ../contracts/BananaLeaderboard.sol src/
+cp ../contracts/Leaderboard.sol src/
 
 # Deploy (replace YOUR_PRIVATE_KEY)
 forge create --rpc-url https://33111.rpc.thirdweb.com \
   --private-key YOUR_PRIVATE_KEY \
-  src/BananaLeaderboard.sol:BananaLeaderboard
+  src/Leaderboard.sol:Leaderboard
 
 # Save the deployed contract address
 ```
@@ -54,7 +54,7 @@ forge create --rpc-url https://33111.rpc.thirdweb.com \
    ```
 
 2. Test the following flows:
-   - Connect wallet
+   - Log in
    - Play a game
    - Check if score is submitted on game over
    - Navigate to `/leaderboard`

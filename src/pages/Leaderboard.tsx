@@ -8,11 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, RefreshCw, Trophy, Medal, Award } from 'lucide-react';
-import { useActiveAccount } from 'thirdweb/react';
 
 const Leaderboard: React.FC = () => {
   const navigate = useNavigate();
-  const account = useActiveAccount();
   const { originalWalletAddress, formatAddress } = useWalletAddresses();
   const { leaderboard, isLoading, error, fetchLeaderboard, lastUpdated } = useLeaderboard();
 
@@ -108,15 +106,6 @@ const Leaderboard: React.FC = () => {
           </Card>
         )}
 
-        {/* Connection Warning */}
-        {!account && (
-          <Alert className="bg-yellow-500/10 border-yellow-500/50">
-            <AlertDescription className="text-center">
-              Connect your wallet to rank on the board!
-            </AlertDescription>
-          </Alert>
-        )}
-
         {/* Error Alert */}
         {error && (
           <Alert variant="destructive">
@@ -133,7 +122,7 @@ const Leaderboard: React.FC = () => {
               </div>
             ) : top20.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No scores yet. Be the first to play!
+                No scores yet. Be the first to rank!
               </div>
             ) : (
               <Table>

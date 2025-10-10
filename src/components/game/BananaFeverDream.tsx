@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameState } from '@/hooks/useGameState';
+import { useCoinSlot } from '@/hooks/useCoinSlot';
+import { useActiveAccount } from 'thirdweb/react';
 import { GameCanvas } from './GameCanvas';
 
 import { GameOver } from './GameOver';
@@ -9,7 +11,9 @@ import { toast } from 'sonner';
 
 export const BananaFeverDream: React.FC = () => {
   const navigate = useNavigate();
+  const account = useActiveAccount();
   const { gameState, config, startGame, resetToReady, gameOver, activateFever } = useGameState();
+  const { payToPlay, isPaying, error: paymentError } = useCoinSlot();
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -68,7 +72,31 @@ export const BananaFeverDream: React.FC = () => {
   }, [gameState.secretMode]);
 
   const handleStartGame = () => {
-    startGame();
+    // Determine play mode based on wallet connection
+    const mode = account ? 'practice' : 'not-connected';
+    startGame(mode);
+  };
+
+  const handleInsertCoin = async () => {
+    if (!account) {
+      toast.error('Please log in first');
+      return;
+    }
+
+    // Pay to play
+    const success = await payToPlay();
+    
+    if (success) {
+      toast.success('Payment successful! Starting game...', {
+        duration: 2000,
+      });
+      // Start game in compete mode
+      startGame('compete');
+    } else {
+      toast.error(paymentError || 'Payment failed. Please try again.', {
+        duration: 3000,
+      });
+    }
   };
 
   const handleResetToReady = () => {
@@ -187,15 +215,41 @@ export const BananaFeverDream: React.FC = () => {
             <div className="w-[800px] mt-4 flex justify-between items-start">
               {/* Game Controls - left side */}
               <div className="flex gap-2">
-                <Button
-                  onClick={gameState.status === 'ready' ? handleStartGame : gameOver}
-                  size="lg"
-                  className="bg-gradient-banana hover:shadow-fever 
-                           transition-all duration-300 transform hover:scale-105
-                           border-2 border-primary-glow"
-                >
-                  {gameState.status === 'ready' ? 'START GAME' : 'END GAME'}
-                </Button>
+                {gameState.status === 'ready' ? (
+                  <>
+                    <Button
+                      onClick={handleInsertCoin}
+                      disabled={isPaying || !account}
+                      size="lg"
+                      className="bg-gradient-banana hover:shadow-fever 
+                               transition-all duration-300 transform hover:scale-105
+                               border-2 border-primary-glow disabled:opacity-50"
+                    >
+                      {isPaying ? 'PROCESSING...' : 'INSERT COIN'}
+                    </Button>
+                    <Button
+                      onClick={handleStartGame}
+                      size="lg"
+                      variant="outline"
+                      className="border-primary hover:bg-primary/10"
+                    >
+                      PRACTICE
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    onClick={gameOver}
+                    size="lg"
+                    variant="outline"
+                    className="border-primary hover:bg-primary/10"
+                  >
+                    END GAME
+                  </Button>
+                )}
+              </div>
+
+              {/* Navigation buttons - right side */}
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="lg"
@@ -220,15 +274,6 @@ export const BananaFeverDream: React.FC = () => {
                 >
                   FEEDBACK
                 </Button>
-              </div>
-
-              {/* Controls hint - right side */}
-              <div className="flex flex-col items-start gap-2">
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border border-border text-xs text-muted-foreground">
-                  <div>WASD / Arrows: Move</div>
-                  <div>Space: Shoot</div>
-                  <div>F: Activate Fever</div>
-                </div>
               </div>
             </div>
           </div>

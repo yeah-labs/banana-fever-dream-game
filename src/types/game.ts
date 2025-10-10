@@ -1,6 +1,8 @@
 import { GameStatus, PowerUpType, PowerUpRarity, EnemyType, EnemyPattern, BulletType } from './gameEnums';
 import { PowerUpEffect } from './powerUpEffects';
 
+export type PlayMode = 'not-connected' | 'practice' | 'compete';
+
 export interface Position {
   x: number;
   y: number;
@@ -74,6 +76,7 @@ export interface GameState {
   realityStormActive: boolean;
   realityStormEndTime: number;
   realityStormIntensity: number;
+  playMode: PlayMode;
 }
 
 export interface GameConfig {

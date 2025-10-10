@@ -32,7 +32,7 @@ Store **both addresses** but display only the **original wallet address** in the
 
 ### 1. Smart Contract Changes
 
-**File:** `/contracts/BananaLeaderboard.sol`
+**File:** `/contracts/Leaderboard.sol`
 
 ```solidity
 struct ScoreEntry {
@@ -254,7 +254,7 @@ To test original wallet tracking:
 
 ## Files Modified
 
-1. ✅ `contracts/BananaLeaderboard.sol` - Added originalWallet field
+1. ✅ `contracts/Leaderboard.sol` - Added originalWallet field
 2. ✅ `src/types/leaderboard.ts` - Added originalWallet to type
 3. ✅ `src/hooks/useWalletAddresses.ts` - NEW centralized hook
 4. ✅ `src/hooks/useLeaderboard.ts` - Pass originalWallet to contract
@@ -265,7 +265,7 @@ To test original wallet tracking:
 
 When deploying the updated contract:
 
-1. **Deploy** new `BananaLeaderboard.sol` contract
+1. **Deploy** new `Leaderboard.sol` contract
 2. **Update** contract address in `/src/lib/thirdweb.ts`
 3. **Update** ABI in `/src/hooks/useLeaderboard.ts` (if needed)
 4. **Test** with different wallet types

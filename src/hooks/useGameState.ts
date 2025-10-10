@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { GameState, GameConfig, Player, Enemy, Bullet, PowerUp, Position, GameObject } from '@/types/game';
+import { GameState, GameConfig, Player, Enemy, Bullet, PowerUp, Position, GameObject, PlayMode } from '@/types/game';
 import { GameStatus, PowerUpType, PowerUpRarity, EnemyType, EnemyPattern, BulletType } from '@/types/gameEnums';
 import { PowerUpEffect } from '@/types/powerUpEffects';
 import { GAME_CONSTANTS } from '@/config/gameConstants';
@@ -63,7 +63,8 @@ const createInitialState = (): GameState => ({
   feversUsed: 0,
   realityStormActive: false,
   realityStormEndTime: 0,
-  realityStormIntensity: 0
+  realityStormIntensity: 0,
+  playMode: 'not-connected'
 });
 
 export const useGameState = () => {
@@ -101,11 +102,12 @@ export const useGameState = () => {
   }, []);
 
   // Game actions
-  const startGame = useCallback(() => {
+  const startGame = useCallback((mode: PlayMode = 'practice') => {
     safeSetGameState(prev => ({
       ...createInitialState(),
       status: GameStatus.PLAYING,
       secretMode: prev.secretMode,
+      playMode: mode,
       lastFrame: performance.now()
     }));
   }, []);
@@ -114,7 +116,8 @@ export const useGameState = () => {
     safeSetGameState(prev => ({
       ...createInitialState(),
       status: GameStatus.READY,
-      secretMode: false
+      secretMode: false,
+      playMode: prev.playMode // Preserve play mode when resetting
     }));
   }, []);
 

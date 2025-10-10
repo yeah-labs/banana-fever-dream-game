@@ -10,13 +10,13 @@ import { useWalletAddresses } from '@/hooks/useWalletAddresses';
 import apechainLogo from '@/assets/poweredby-apechain.png';
 
 const wallets = [
-  // Smart wallet with gasless transactions
+  // Smart wallet for gas-sponsored score submissions
   smartWallet({
     chain: curtis,
     factoryAddress: ACCOUNT_FACTORY_ADDRESS,
     gasless: true, // Enable gasless transactions
   }),
-  // Regular wallets (users can still connect with these)
+  // Regular wallets (users log in with these, smart account wraps them)
   inAppWallet({
     auth: {
       options: ["google", "discord", "x"],
@@ -59,7 +59,7 @@ const Header: React.FC = () => {
             />
           </div>
 
-          {/* Wallet Connection Section */}
+          {/* User Login Section */}
           <div className="flex items-center space-x-4">
             {isConnected && account ? (
               <div className="flex items-center space-x-3">
@@ -69,7 +69,7 @@ const Header: React.FC = () => {
                   {formattedOriginalAddress}
                 </Badge>
                 
-                {/* Disconnect Button */}
+                {/* Log Out Button */}
                 <Button
                   variant="outline"
                   size="sm"
@@ -77,7 +77,7 @@ const Header: React.FC = () => {
                   className="bg-card/10 border-border text-primary-foreground hover:bg-card/10 hover:border-border hover:text-primary-foreground"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Disconnect
+                  Log Out
                 </Button>
               </div>
             ) : (
@@ -91,7 +91,7 @@ const Header: React.FC = () => {
                   showThirdwebBranding: true,
                 }}
                 connectButton={{
-                  label: "Connect",
+                  label: "Log In",
                   style: {
                     backgroundColor: 'hsl(var(--card) / 0.1)',
                     border: '1px solid hsl(var(--border))',
@@ -102,7 +102,7 @@ const Header: React.FC = () => {
                   }
                 }}
                 theme="dark"
-                // Enable account abstraction
+                // Enable account abstraction for gas-sponsored transactions
                 accountAbstraction={{
                   chain: curtis,
                   factoryAddress: ACCOUNT_FACTORY_ADDRESS,
