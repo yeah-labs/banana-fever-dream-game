@@ -16,6 +16,7 @@ Welcome to the Banana Fever Dream game documentation! This folder contains all t
 - **[Leaderboard Implementation](implementation/LEADERBOARD_IMPLEMENTATION.md)** - Technical details of the leaderboard system
 - **[Leaderboard Deployment](implementation/LEADERBOARD_DEPLOYMENT.md)** - Step-by-step deployment instructions
 - **[Original Wallet Tracking](implementation/ORIGINAL_WALLET_TRACKING.md)** - How we track and display original wallet addresses
+- **[Analytics Integration](implementation/ANALYTICS_INTEGRATION.md)** - Plausible Analytics implementation and tracked events
 - **[Gas Sponsored Payment Flow](implementation/GAS_SPONSORED_PAYMENT_FLOW.md)** - Alternative approach (dual gas sponsorship - for reference)
 - **[Changes Summary](implementation/CHANGES_SUMMARY.md)** - Summary of all changes made during development
 - **[Documentation Updates](implementation/DOCUMENTATION_UPDATES.md)** - Log of documentation changes

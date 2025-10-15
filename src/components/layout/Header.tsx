@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { LogOut, User } from 'lucide-react';
 import { client, curtis, ACCOUNT_FACTORY_ADDRESS } from '@/lib/thirdweb';
 import { useWalletAddresses } from '@/hooks/useWalletAddresses';
+import { trackClick } from '@/utils/analytics';
 import apechainLogo from '@/assets/poweredby-apechain.png';
 
 const wallets = [
@@ -35,6 +36,7 @@ const Header: React.FC = () => {
   const { formattedOriginalAddress, isConnected } = useWalletAddresses();
 
   const handleDisconnect = () => {
+    trackClick('Log Out', 'button');
     if (wallet) {
       disconnect(wallet);
     }
@@ -47,7 +49,10 @@ const Header: React.FC = () => {
           {/* Logo/Brand */}
           <div className="flex items-center gap-6">
             <button 
-              onClick={() => window.open('https://banana-fever-dream.lovable.app/', '_self')}
+              onClick={() => {
+                trackClick('Banana Fever Dream', 'link');
+                window.open('https://banana-fever-dream.lovable.app/', '_self');
+              }}
               className="text-2xl font-bold text-primary-foreground cursor-pointer"
             >
               🍌 Banana Fever Dream
@@ -81,34 +86,36 @@ const Header: React.FC = () => {
                 </Button>
               </div>
             ) : (
-              <ConnectButton
-                client={client}
-                wallets={wallets}
-                chain={curtis}
-                connectModal={{
-                  size: "compact",
-                  title: "Sign In",
-                  showThirdwebBranding: true,
-                }}
-                connectButton={{
-                  label: "Log In",
-                  style: {
-                    backgroundColor: 'hsl(var(--card) / 0.1)',
-                    border: '1px solid hsl(var(--border))',
-                    color: 'hsl(var(--primary-foreground))',
-                    height: '2.25rem',
-                    fontSize: '0.875rem',
-                    padding: '0 0.75rem',
-                  }
-                }}
-                theme="dark"
-                // Enable account abstraction for gas-sponsored transactions
-                accountAbstraction={{
-                  chain: curtis,
-                  factoryAddress: ACCOUNT_FACTORY_ADDRESS,
-                  gasless: true,
-                }}
-              />
+              <div onClick={() => trackClick('Log In', 'button')}>
+                <ConnectButton
+                  client={client}
+                  wallets={wallets}
+                  chain={curtis}
+                  connectModal={{
+                    size: "compact",
+                    title: "Sign In",
+                    showThirdwebBranding: true,
+                  }}
+                  connectButton={{
+                    label: "Log In",
+                    style: {
+                      backgroundColor: 'hsl(var(--card) / 0.1)',
+                      border: '1px solid hsl(var(--border))',
+                      color: 'hsl(var(--primary-foreground))',
+                      height: '2.25rem',
+                      fontSize: '0.875rem',
+                      padding: '0 0.75rem',
+                    }
+                  }}
+                  theme="dark"
+                  // Enable account abstraction for gas-sponsored transactions
+                  accountAbstraction={{
+                    chain: curtis,
+                    factoryAddress: ACCOUNT_FACTORY_ADDRESS,
+                    gasless: true,
+                  }}
+                />
+              </div>
             )}
           </div>
         </div>

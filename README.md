@@ -60,6 +60,7 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 - ThirdWeb (Web3 wallet integration)
+- Plausible Analytics (Privacy-friendly analytics)
 
 ## 🎮 Game Features
 
@@ -72,18 +73,39 @@ This project is built with:
 - **Smart accounts** - Automatic account abstraction for seamless UX
 - **Original wallet tracking** - Consistent user identification across smart and regular wallets
 
+## Environment Variables Setup
+
+This project requires environment variables to function. Create a `.env` file in the root directory with the following variables:
+
+```env
+# ThirdWeb Configuration
+VITE_THIRDWEB_CLIENT_ID=your_thirdweb_client_id_here
+
+# ApeChain Contract Addresses
+VITE_LEADERBOARD_CONTRACT_ADDRESS=0x1a184ce89ce282c23abc38e9f2d010ce740393cb
+VITE_COINSLOT_CONTRACT_ADDRESS=0x871103bae46a7fc99ba11f1312b4cadd44cda3b8
+VITE_ACCOUNT_FACTORY_ADDRESS=0x1b853d955330c72c964bb33d624248ff213d9335
+
+# Game Configuration
+VITE_COIN_COST_APE=0.1
+
+# Supabase Configuration (if using Supabase features)
+VITE_SUPABASE_URL=your_supabase_project_url_here
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key_here
+```
+
+**Note**: All environment variables are required. The app will not function without them.
+
+### Getting Your Values
+
+1. **ThirdWeb Client ID**: Get from [ThirdWeb Dashboard](https://thirdweb.com/dashboard)
+2. **Contract Addresses**: Use the default values shown above (deployed on ApeChain Curtis)
+3. **Coin Cost**: Set to `0.1` for 0.1 APE per game (adjust as needed)
+4. **Supabase**: Get from your [Supabase Project Settings](https://supabase.com/dashboard)
+
 ## ThirdWeb Integration
 
-This project includes ThirdWeb integration for Web3 wallet connections with social login support.
-
-### Setup
-
-1. Get your ThirdWeb Client ID from [ThirdWeb Dashboard](https://thirdweb.com/dashboard)
-2. Create a `.env` file in the root directory:
-   ```
-   VITE_THIRDWEB_CLIENT_ID=your-thirdweb-client-id-here
-   ```
-3. The app will automatically use the client ID for wallet connections
+This project includes ThirdWeb integration for Web3 wallet connections with social login support
 
 ### Features
 
@@ -150,6 +172,33 @@ Monitor gas sponsorship usage in your thirdweb dashboard:
 - Set daily/monthly budgets
 - Configure rate limiting
 - Set up budget alerts
+
+## 📊 Analytics
+
+The project uses **Plausible Analytics** for privacy-friendly, GDPR-compliant user tracking.
+
+### What's Tracked
+
+- **User Interactions**: Button clicks and navigation
+- **Game Events**: Game starts, game ends, scores
+- **Engagement Metrics**: Feature usage and user flow
+
+### Events Tracked
+
+1. **Click Events**: All major buttons (Login, Practice, Leaderboard, etc.)
+2. **Game Started**: Tracks mode (compete vs practice)
+3. **Game Ended**: Tracks mode, type (manual/game over), and final score
+
+### Privacy
+
+- No personal data collected
+- No cookies used
+- GDPR/CCPA compliant
+- IP addresses anonymized
+
+### Documentation
+
+For full analytics implementation details, see [Analytics Integration Guide](docs/implementation/ANALYTICS_INTEGRATION.md).
 
 ## How can I deploy this project?
 

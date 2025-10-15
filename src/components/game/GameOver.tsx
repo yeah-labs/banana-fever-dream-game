@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { GameState } from '@/types/game';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { Trophy } from 'lucide-react';
+import { trackClick } from '@/utils/analytics';
 
 interface GameOverProps {
   gameState: GameState;
@@ -145,7 +146,10 @@ export const GameOver: React.FC<GameOverProps> = ({
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
-            onClick={onRestart}
+            onClick={() => {
+              trackClick('Play Again', 'button');
+              onRestart();
+            }}
             size="lg"
             className="bg-gradient-banana hover:shadow-fever 
                      transition-all duration-300 transform hover:scale-105"
@@ -156,17 +160,23 @@ export const GameOver: React.FC<GameOverProps> = ({
             variant="outline"
             size="lg"
             className="border-primary hover:bg-primary/10"
-            onClick={() => navigate('/leaderboard')}
+            onClick={() => {
+              trackClick('Leaderboard', 'button');
+              navigate('/leaderboard');
+            }}
           >
-            LEADERBOARD
+            Leaderboard
           </Button>
           <Button
             variant="outline"
             size="lg"
             className="border-primary hover:bg-primary/10"
-            onClick={() => window.open('https://forms.gle/mNJY7RjN1rg6WvV88', '_blank')}
+            onClick={() => {
+              trackClick('Feedback', 'button');
+              window.open('https://forms.gle/mNJY7RjN1rg6WvV88', '_blank');
+            }}
           >
-            FEEDBACK
+            Feedback
           </Button>
         </div>
 

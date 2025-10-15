@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Gamepad2, Target, Zap } from 'lucide-react';
+import { trackClick } from '@/utils/analytics';
 import powerUpSpreadShot from '@/assets/powerup-spread-shot.png';
 import powerUpShield from '@/assets/powerup-shield.png';
 import powerUpScoreDoubler from '@/assets/powerup-score-doubler.png';
@@ -21,7 +22,10 @@ const Info: React.FC = () => {
           <Button
             variant="outline"
             size="lg"
-            onClick={() => navigate('/')}
+            onClick={() => {
+              trackClick('Back to Game', 'button');
+              navigate('/');
+            }}
             className="border-primary hover:bg-primary/10"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

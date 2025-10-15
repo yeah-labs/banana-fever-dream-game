@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, RefreshCw, Trophy, Medal, Award } from 'lucide-react';
+import { trackClick } from '@/utils/analytics';
 
 const Leaderboard: React.FC = () => {
   const navigate = useNavigate();
@@ -59,7 +60,10 @@ const Leaderboard: React.FC = () => {
           <Button
             variant="outline"
             size="lg"
-            onClick={() => navigate('/')}
+            onClick={() => {
+              trackClick('Back to Game', 'button');
+              navigate('/');
+            }}
             className="border-primary hover:bg-primary/10"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -69,7 +73,10 @@ const Leaderboard: React.FC = () => {
           <Button
             variant="outline"
             size="lg"
-            onClick={fetchLeaderboard}
+            onClick={() => {
+              trackClick('Refresh', 'button');
+              fetchLeaderboard();
+            }}
             disabled={isLoading}
             className="border-primary hover:bg-primary/10"
           >

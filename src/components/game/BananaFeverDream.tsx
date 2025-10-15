@@ -8,6 +8,7 @@ import { GameCanvas } from './GameCanvas';
 import { GameOver } from './GameOver';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { trackClick, trackGameStarted, trackGameEnded } from '@/utils/analytics';
 
 export const BananaFeverDream: React.FC = () => {
   const navigate = useNavigate();
@@ -53,9 +54,10 @@ export const BananaFeverDream: React.FC = () => {
   // Check for game over conditions
   useEffect(() => {
     if (gameState.status === 'playing' && gameState.player.health <= 0) {
+      trackGameEnded(gameState.playMode, 'game over', gameState.player.score);
       gameOver();
     }
-  }, [gameState.status, gameState.player.health, gameOver]);
+  }, [gameState.status, gameState.player.health, gameState.playMode, gameState.player.score, gameOver]);
 
   // Secret mode activation toast
   useEffect(() => {
@@ -72,12 +74,15 @@ export const BananaFeverDream: React.FC = () => {
   }, [gameState.secretMode]);
 
   const handleStartGame = () => {
+    trackClick('Practice', 'button');
     // Determine play mode based on wallet connection
     const mode = account ? 'practice' : 'not-connected';
     startGame(mode);
+    trackGameStarted(mode);
   };
 
   const handleInsertCoin = async () => {
+    trackClick('Insert Coin', 'button');
     if (!account) {
       toast.error('Please log in first');
       return;
@@ -92,6 +97,7 @@ export const BananaFeverDream: React.FC = () => {
       });
       // Start game in compete mode
       startGame('compete');
+      trackGameStarted('compete');
     } else {
       toast.error(paymentError || 'Payment failed. Please try again.', {
         duration: 3000,
@@ -109,10 +115,12 @@ export const BananaFeverDream: React.FC = () => {
   };
 
   const handleLeaderboardClick = () => {
+    trackClick('Leaderboard', 'button');
     navigate('/leaderboard');
   };
 
   const handleInfoClick = () => {
+    trackClick('Info', 'button');
     navigate('/info');
   };
 
@@ -233,12 +241,16 @@ export const BananaFeverDream: React.FC = () => {
                       variant="outline"
                       className="border-primary hover:bg-primary/10"
                     >
-                      PRACTICE
+                      Practice
                     </Button>
                   </>
                 ) : (
                   <Button
-                    onClick={gameOver}
+                    onClick={() => {
+                      trackClick('End Game', 'button');
+                      trackGameEnded(gameState.playMode, 'manual', gameState.player.score);
+                      gameOver();
+                    }}
                     size="lg"
                     variant="outline"
                     className="border-primary hover:bg-primary/10"
@@ -256,7 +268,7 @@ export const BananaFeverDream: React.FC = () => {
                   className="border-primary hover:bg-primary/10"
                   onClick={handleLeaderboardClick}
                 >
-                  LEADERBOARD
+                  Leaderboard
                 </Button>
                 <Button
                   variant="outline"
@@ -264,15 +276,18 @@ export const BananaFeverDream: React.FC = () => {
                   className="border-primary hover:bg-primary/10"
                   onClick={handleInfoClick}
                 >
-                  INFO
+                  Info
                 </Button>
                 <Button
                   variant="outline"
                   size="lg"
                   className="border-primary hover:bg-primary/10"
-                  onClick={() => window.open('https://forms.gle/mNJY7RjN1rg6WvV88', '_blank')}
+                  onClick={() => {
+                    trackClick('Feedback', 'button');
+                    window.open('https://forms.gle/mNJY7RjN1rg6WvV88', '_blank');
+                  }}
                 >
-                  FEEDBACK
+                  Feedback
                 </Button>
               </div>
             </div>

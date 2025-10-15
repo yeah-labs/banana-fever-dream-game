@@ -83,8 +83,8 @@ export const useCoinSlot = () => {
   }, [account, contract]);
 
   /**
-   * Pay 0.1 APE to play the game in compete mode
-   * Uses admin wallet (EOA) to pay - user pays 0.1 APE + gas
+   * Pay to play the game in compete mode
+   * Uses admin wallet (EOA) to pay - user pays APE + gas
    * Smart account is used only for score submission (gas sponsored)
    */
   const payToPlay = useCallback(async (): Promise<boolean> => {
@@ -111,15 +111,18 @@ export const useCoinSlot = () => {
       console.log('Smart account address:', account.address);
       console.log('Admin wallet exists:', !!adminWallet);
 
-      // Prepare the transaction to pay 0.1 APE
+      // Get coin cost from environment variable
+      const coinCost = import.meta.env.VITE_COIN_COST_APE;
+      
+      // Prepare the transaction to pay APE
       const transaction = prepareContractCall({
         contract,
         method: "playGame",
         params: [],
-        value: toWei('0.1'), // 0.1 APE
+        value: toWei(coinCost),
       });
 
-      // Send transaction from ADMIN/PERSONAL WALLET - user pays gas + 0.1 APE
+      // Send transaction from ADMIN/PERSONAL WALLET - user pays gas + APE
       const result = await sendAndConfirmTransaction({
         transaction,
         account: paymentAccount, // Admin wallet pays, not smart account
