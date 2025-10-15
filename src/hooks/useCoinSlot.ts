@@ -112,7 +112,7 @@ export const useCoinSlot = () => {
       console.log('Admin wallet exists:', !!adminWallet);
 
       // Get coin cost from environment variable
-      const coinCost = import.meta.env.VITE_COIN_COST_APE;
+      const coinCost = import.meta.env.VITE_COIN_COST_APE || "0.1";
       
       // Prepare the transaction to pay APE
       const transaction = prepareContractCall({
